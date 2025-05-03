@@ -35,53 +35,45 @@
                                         <h1 class="display-5 fw-semibold mb-3">Encontre seu emprego ideal com <span class="text-primary fw-bold">Carrinho</span></h1>
                                         <p class="lead text-muted mb-0">Encontre vagas, crie currículos rastreáveis e enriqueça suas candidaturas. Cuidadosamente elaborado após análise das necessidades de diferentes setores.</p>
                                     </div>
-                                    <form action="#">
+                                    <form action="/job-list.html">
                                         <div class="registration-form">
                                             <div class="row g-0">
                                                 <div class="col-md-4">
                                                     <div class="filter-search-form filter-border mt-3 mt-md-0">
                                                         <i class="uil uil-briefcase-alt"></i>
-                                                        <input type="search" id="job-title" class="form-control filter-input-box" placeholder="Cargo, Nome da empresa...">
+                                                        <input type="search" id="job-title" name="choices-single-search" class="form-control filter-input-box" placeholder="Cargo...">
                                                     </div>
                                                 </div><!--end col-->
-                                                <div class="col-md-4">
+                                                <div class="col-md-5">
                                                     <div class="filter-search-form mt-3 mt-md-0">
                                                         <i class="uil uil-map-marker"></i>
                                                         <select class="form-select" data-trigger name="choices-single-location" id="choices-single-location" aria-label="Default select example">
                                                             <option value="">Selecione o local</option>
-                                                            <option value="AC">Acre</option>
-                                                            <option value="AL">Alagoas</option>
-                                                            <option value="AP">Amapá</option>
-                                                            <option value="AM">Amazonas</option>
-                                                            <option value="BA">Bahia</option>
-                                                            <option value="CE">Ceará</option>
-                                                            <option value="DF">Distrito Federal</option>
-                                                            <option value="ES">Espírito Santo</option>
-                                                            <option value="GO">Goiás</option>
-                                                            <option value="MA">Maranhão</option>
-                                                            <option value="MT">Mato Grosso</option>
-                                                            <option value="MS">Mato Grosso do Sul</option>
-                                                            <option value="MG">Minas Gerais</option>
-                                                            <option value="PA">Pará</option>
-                                                            <option value="PB">Paraíba</option>
-                                                            <option value="PR">Paraná</option>
-                                                            <option value="PE">Pernambuco</option>
-                                                            <option value="PI">Piauí</option>
-                                                            <option value="RJ">Rio de Janeiro</option>
-                                                            <option value="RN">Rio Grande do Norte</option>
-                                                            <option value="RS">Rio Grande do Sul</option>
-                                                            <option value="RO">Rondônia</option>
-                                                            <option value="RR">Roraima</option>
-                                                            <option value="SC">Santa Catarina</option>
-                                                            <option value="SP">São Paulo</option>
-                                                            <option value="SE">Sergipe</option>
-                                                            <option value="TO">Tocantins</option>
+                                                            <option value="">Selecione o local</option>
+                                                            <option value="Bengo">Bengo</option>
+                                                            <option value="Benguela">Benguela</option>
+                                                            <option value="Bié">Bié</option>
+                                                            <option value="Cabinda">Cabinda</option>
+                                                            <option value="Cuando Cubango">Cuando Cubango</option>
+                                                            <option value="Cuanza Norte">Cuanza Norte</option>
+                                                            <option value="Cuanza Sul">Cuanza Sul</option>
+                                                            <option value="Cunene">Cunene</option>
+                                                            <option value="Huambo">Huambo</option>
+                                                            <option value="Huíla">Huíla</option>
+                                                            <option value="Luanda">Luanda</option>
+                                                            <option value="Lunda Norte">Lunda Norte</option>
+                                                            <option value="Lunda Sul">Lunda Sul</option>
+                                                            <option value="Malanje">Malanje</option>
+                                                            <option value="Moxico">Moxico</option>
+                                                            <option value="Namibe">Namibe</option>
+                                                            <option value="Uíge">Uíge</option>
+                                                            <option value="Zaire">Zaire</option>
                                                         </select>
                                                     </div>
                                                 </div><!--end col-->
-                                                <div class="col-md-4">
+                                                <div class="col-md-3">
                                                     <div class="mt-3 mt-md-0 h-100">
-                                                        <button class="btn btn-primary submit-btn w-100 h-100" type="submit"><i class="uil uil-search me-1"></i> Buscar Vaga</button>
+                                                        <button class="btn btn-primary submit-btn w-100 h-100" type="submit"><i class="uil uil-search me-1"></i> Buscar</button>
                                                     </div>
                                                 </div><!--end col-->
                                             </div><!--end row-->
@@ -499,9 +491,8 @@
                             <div class="row align-items-center">
                                 <div class="col-lg-6">
                                     <div class="section-title me-5">
-                                        <h3 class="title">How It Work</h3>
-                                        <p class="text-muted">Post a job to tell us about your project. We'll quickly match you with the
-                                            right freelancers.</p>
+                                        <h3 class="title">Como Funciona</h3>
+                                        <p class="text-muted">Veja como é fácil encontrar e se candidatar a vagas no portal Carrinho.</p>
                                         <div class="process-menu nav flex-column nav-pills" id="v-pills-tab" role="tablist" aria-orientation="vertical">
                                             <a class="nav-link active" id="v-pills-home-tab" data-bs-toggle="pill" href="#v-pills-home" role="tab" aria-controls="v-pills-home" aria-selected="true">
                                                 <div class="d-flex">
@@ -509,9 +500,8 @@
                                                         1
                                                     </div>
                                                     <div class="flex-grow-1 text-start ms-3">
-                                                        <h5 class="fs-18">Register an account</h5>
-                                                        <p class="text-muted mb-0">Due to its widespread use as filler text for layouts, non-readability
-                                                            is of great importance.</p>
+                                                        <h5 class="fs-18">Crie sua conta</h5>
+                                                        <p class="text-muted mb-0">Cadastre-se gratuitamente para acessar todas as funcionalidades e oportunidades.</p>
                                                     </div>
                                                 </div>
                                             </a>
@@ -521,9 +511,8 @@
                                                         2
                                                     </div>
                                                     <div class="flex-grow-1 text-start ms-3">
-                                                        <h5 class="fs-18">Find your job</h5>
-                                                        <p class="text-muted mb-0">There are many variations of passages of avaibookmark-label, but the majority
-                                                            alteration in some form.</p>
+                                                        <h5 class="fs-18">Encontre sua vaga</h5>
+                                                        <p class="text-muted mb-0">Busque vagas de acordo com seu perfil e localização desejada.</p>
                                                     </div>
                                                 </div>
                                             </a>
@@ -533,9 +522,8 @@
                                                         3
                                                     </div>
                                                     <div class="flex-grow-1 text-start ms-3">
-                                                        <h5 class="fs-18">Apply for job</h5>
-                                                        <p class="text-muted mb-0">It is a long established fact that a reader will be distracted by the
-                                                            readable content of a page.</p>
+                                                        <h5 class="fs-18">Candidate-se</h5>
+                                                        <p class="text-muted mb-0">Envie seu currículo e acompanhe o status das suas candidaturas diretamente pelo site.</p>
                                                     </div>
                                                 </div>
                                             </a>
@@ -566,12 +554,10 @@
                             <div class="row justify-content-center">
                                 <div class="col-lg-7">
                                     <div class="text-center">
-                                        <h2 class="text-primary mb-4">Browse Our <span class="text-warning fw-bold">5,000+</span> Latest
-                                            Jobs</h2>
-                                        <p class="text-muted">Post a job to tell us about your project. We'll quickly match you with
-                                            the right freelancers.</p>
+                                        <h2 class="text-primary mb-4">Vagas da <span class="text-warning fw-bold">Carrinho</span></h2>
+                                        <p class="text-muted">Confira as oportunidades disponíveis e faça parte do nosso time. Encontre a vaga ideal para você!</p>
                                         <div class="mt-4 pt-2">
-                                            <a href="javascript:void(0)" class="btn btn-primary btn-hover">Started Now <i class="uil uil-rocket align-middle ms-1"></i></a>
+                                            <a href="job-list.html" class="btn btn-primary btn-hover">Ver Vagas <i class="uil uil-rocket align-middle ms-1"></i></a>
                                         </div>
                                     </div>
                                 </div><!--end col-->
@@ -586,9 +572,8 @@
                             <div class="row justify-content-center">
                                 <div class="col-lg-6">
                                     <div class="section-title text-center mb-4 pb-2">
-                                        <h3 class="title mb-3">Happy Candidates</h3>
-                                        <p class="text-muted">Post a job to tell us about your project. We'll quickly match you with the
-                                            right freelancers.</p>
+                                        <h3 class="title mb-3">Candidatos Satisfeitos</h3>
+                                        <p class="text-muted">Publique uma vaga para nos contar sobre seu projeto. Vamos rapidamente conectá-lo com os profissionais certos.</p>
                                     </div>
                                 </div>
                                 <!--end col-->
@@ -601,42 +586,46 @@
                                             <div class="swiper-slide">
                                                 <div class="card testi-box">
                                                     <div class="card-body">
-                                                        <div class="mb-4">
-                                                            <img src="assets/images/logo/mailchimp.svg" height="50" alt="" />
+                                                        <div class="mb-4 d-flex justify-content-center align-items-center">
+                                                            <div class="mailchimp-avatar">
+                                                                <img src="assets/images/logo/mailchimp.jpg" alt="" style="" />
+                                                            </div>
                                                         </div>
-                                                        <p class="testi-content lead text-muted mb-4">" Very well thought out and articulate communication.
-                                                            Clear milestones, deadlines and fast work. Patience. Infinite patience. No
-                                                            shortcuts. Even if the client is being careless. "</p>
-                                                        <h5 class="mb-0">Jeffrey Montgomery</h5>
-                                                        <p class="text-muted mb-0">Product Manager</p>
+                                                        <p class="testi-content lead text-muted mb-4">"A Carrinho facilitou demais minha busca por vagas de Analista de Dados. Achei oportunidades alinhadas ao meu perfil e consegui entrevistas rápido. Recomendo para quem quer crescer na área!"</p>
+                                                        <h5 class="mb-0">Flávio Frederico</h5>
+                                                        <p class="text-muted mb-0">Analista de Dados</p>
                                                     </div>
                                                 </div>
                                             </div><!--end swiper-slide-->
                                             <div class="swiper-slide">
                                                 <div class="card testi-box">
                                                     <div class="card-body">
-                                                        <div class="mb-4">
-                                                            <img src="assets/images/logo/wordpress.svg" height="50" alt="" />
+                                                        <div class="mb-4 d-flex justify-content-center align-items-center">
+                                                            <div class="mailchimp-avatar">
+                                                                <img src="assets/images/profile.jpg" alt="Foto de Rebecca Swartz" />
+                                                            </div>
                                                         </div>
-                                                        <p class="testi-content lead text-muted mb-4">" Very well thought out and articulate communication.
-                                                            Clear milestones, deadlines and fast work. Patience. Infinite patience. No
-                                                            shortcuts. Even if the client is being careless. "</p>
+                                                        <p class="testi-content lead text-muted mb-4">
+                                                            "Muito bem pensado e comunicação articulada. Marcos claros, prazos e trabalho rápido. Paciência. Paciência infinita. Sem atalhos. Mesmo que o cliente esteja sendo descuidado."
+                                                        </p>
                                                         <h5 class="mb-0">Rebecca Swartz</h5>
-                                                        <p class="text-muted mb-0">Creative Designer</p>
+                                                        <p class="text-muted mb-0">Designer Criativa</p>
                                                     </div>
                                                 </div>
                                             </div><!--end swiper-slide-->
                                             <div class="swiper-slide">
                                                 <div class="card testi-box">
                                                     <div class="card-body">
-                                                        <div class="mb-4">
-                                                            <img src="assets/images/logo/instagram.svg" height="50" alt="" />
+                                                        <div class="mb-4 d-flex justify-content-center align-items-center">
+                                                            <div class="mailchimp-avatar">
+                                                                <img src="assets/images/profile.jpg" alt="Foto de Charles Dickens" />
+                                                            </div>
                                                         </div>
-                                                        <p class="testi-content lead text-muted mb-4">" Very well thought out and articulate communication.
-                                                            Clear milestones, deadlines and fast work. Patience. Infinite patience. No
-                                                            shortcuts. Even if the client is being careless. "</p>
+                                                        <p class="testi-content lead text-muted mb-4">
+                                                            "Ótima experiência! Comunicação clara, prazos cumpridos e muita dedicação. Recomendo para quem busca profissionalismo e atenção aos detalhes."
+                                                        </p>
                                                         <h5 class="mb-0">Charles Dickens</h5>
-                                                        <p class="text-muted mb-0">Store Assistant</p>
+                                                        <p class="text-muted mb-0">Assistente de Loja</p>
                                                     </div>
                                                 </div>
                                             </div><!--end swiper-slide-->
@@ -659,9 +648,8 @@
                             <div class="row justify-content-center">
                                 <div class="col-lg-6">
                                     <div class="section-title text-center mb-5">
-                                        <h3 class="title mb-3">Quick Career Tips</h3>
-                                        <p class="text-muted">Post a job to tell us about your project. We'll quickly match you with the
-                                            right freelancers.</p>
+                                        <h3 class="title mb-3">Dicas Rápidas para sua Carreira na Carrinho</h3>
+                                        <p class="text-muted">Confira dicas exclusivas para se destacar nos processos seletivos e crescer profissionalmente com a Carrinho.</p>
                                     </div>
                                 </div>
                                 <!--end col-->
@@ -674,26 +662,22 @@
                                             <img src="assets/images/blog/img-01.jpg" alt="" class="img-fluid">
                                             <div class="bg-overlay"></div>
                                             <div class="author">
-                                                <p class=" mb-0"><i class="mdi mdi-account text-light"></i> <a href="javascript:void(0)"
-                                                        class="text-light user">Dirio Walls</a></p>
-                                                <p class="text-light mb-0 date"><i class="mdi mdi-calendar-check"></i> 01 July, 2021</p>
+                                                <p class="mb-0"><i class="mdi mdi-account text-light"></i> <span class="text-light user">Equipe Carrinho</span></p>
+                                                <p class="text-light mb-0 date"><i class="mdi mdi-calendar-check"></i> 10 Junho, 2024</p>
                                             </div>
                                             <div class="likes">
                                                 <ul class="list-unstyled mb-0">
-                                                    <li class="list-inline-item"><a href="javascript:void(0)" class="text-white"><i
-                                                                class="mdi mdi-heart-outline me-1"></i> 33</a></li>
-                                                    <li class="list-inline-item"><a href="javascript:void(0)" class="text-white"><i
-                                                                class="mdi mdi-comment-outline me-1"></i> 08</a></li>
+                                                    <li class="list-inline-item"><span class="text-white"><i class="mdi mdi-heart-outline me-1"></i> 120</span></li>
+                                                    <li class="list-inline-item"><span class="text-white"><i class="mdi mdi-comment-outline me-1"></i> 15</span></li>
                                                 </ul>
                                             </div>
                                         </div>
                                         <div class="card-body">
                                             <a href="blog-details.html" class="primary-link">
-                                                <h5 class="fs-17">How apps is the IT world ?</h5>
+                                                <h5 class="fs-17">Como se destacar nas vagas da Carrinho</h5>
                                             </a>
-                                            <p class="text-muted">The final text is not yet avaibookmark-label. Dummy texts have Internet tend
-                                                been in use by typesetters.</p>
-                                            <a href="blog-details.html" class="form-text text-primary">Read more <i class="mdi mdi-chevron-right align-middle"></i></a>
+                                            <p class="text-muted">Personalize seu currículo para cada vaga, destaque suas experiências e demonstre interesse genuíno pela missão da Carrinho.</p>
+                                            <a href="blog-details.html" class="form-text text-primary">Leia mais <i class="mdi mdi-chevron-right align-middle"></i></a>
                                         </div>
                                     </div><!--end blog-box-->
                                 </div><!--end col-->
@@ -704,26 +688,22 @@
                                             <img src="assets/images/blog/img-02.jpg" alt="" class="img-fluid">
                                             <div class="bg-overlay"></div>
                                             <div class="author">
-                                                <p class=" mb-0"><i class="mdi mdi-account text-light"></i> <a href="javascript:void(0)"
-                                                        class="text-light user">Brandon Carney</a></p>
-                                                <p class="text-light mb-0 date"><i class="mdi mdi-calendar-check"></i> 25 June, 2021</p>
+                                                <p class="mb-0"><i class="mdi mdi-account text-light"></i> <span class="text-light user">RH Carrinho</span></p>
+                                                <p class="text-light mb-0 date"><i class="mdi mdi-calendar-check"></i> 05 Junho, 2024</p>
                                             </div>
                                             <div class="likes">
                                                 <ul class="list-unstyled mb-0">
-                                                    <li class="list-inline-item"><a href="javascript:void(0)" class="text-white"><i
-                                                                class="mdi mdi-heart-outline me-1"></i> 44</a></li>
-                                                    <li class="list-inline-item"><a href="javascript:void(0)" class="text-white"><i
-                                                                class="mdi mdi-comment-outline me-1"></i> 25</a></li>
+                                                    <li class="list-inline-item"><span class="text-white"><i class="mdi mdi-heart-outline me-1"></i> 98</span></li>
+                                                    <li class="list-inline-item"><span class="text-white"><i class="mdi mdi-comment-outline me-1"></i> 10</span></li>
                                                 </ul>
                                             </div>
                                         </div>
                                         <div class="card-body">
                                             <a href="blog-details.html" class="primary-link">
-                                                <h5 class="fs-17">Smartest Applications for Business ?</h5>
+                                                <h5 class="fs-17">Dicas para entrevistas na Carrinho</h5>
                                             </a>
-                                            <p class="text-muted">Due to its widespread use as filler text for layouts, non-readability
-                                                is of great importance: human perception.</p>
-                                            <a href="blog-details.html" class="form-text text-primary">Read more <i class="mdi mdi-chevron-right align-middle"></i></a>
+                                            <p class="text-muted">Pesquise sobre a empresa, prepare exemplos práticos de suas conquistas e seja transparente sobre suas expectativas.</p>
+                                            <a href="blog-details.html" class="form-text text-primary">Leia mais <i class="mdi mdi-chevron-right align-middle"></i></a>
                                         </div>
                                     </div><!--end blog-box-->
                                 </div><!--end col-->
@@ -734,25 +714,22 @@
                                             <img src="assets/images/blog/img-03.jpg" alt="" class="img-fluid">
                                             <div class="bg-overlay"></div>
                                             <div class="author">
-                                                <p class=" mb-0"><i class="mdi mdi-account text-light"></i> <a href="javascript:void(0)"
-                                                        class="text-light user">William Mooneyhan</a></p>
-                                                <p class="text-light mb-0 date"><i class="mdi mdi-calendar-check"></i> 16 March, 2021
-                                                </p>
+                                                <p class="mb-0"><i class="mdi mdi-account text-light"></i> <span class="text-light user">Time de Carreiras</span></p>
+                                                <p class="text-light mb-0 date"><i class="mdi mdi-calendar-check"></i> 01 Junho, 2024</p>
                                             </div>
                                             <div class="likes">
                                                 <ul class="list-unstyled mb-0">
-                                                    <li class="list-inline-item"><a href="javascript:void(0)" class="text-white"><i class="mdi mdi-heart-outline me-1"></i> 68</a></li>
-                                                    <li class="list-inline-item"><a href="javascript:void(0)" class="text-white"><i class="mdi mdi-comment-outline me-1"></i> 20</a></li>
+                                                    <li class="list-inline-item"><span class="text-white"><i class="mdi mdi-heart-outline me-1"></i> 87</span></li>
+                                                    <li class="list-inline-item"><span class="text-white"><i class="mdi mdi-comment-outline me-1"></i> 7</span></li>
                                                 </ul>
                                             </div>
                                         </div>
                                         <div class="card-body">
                                             <a href="blog-details.html" class="primary-link">
-                                                <h5 class="fs-17">Design your apps in your own way ?</h5>
+                                                <h5 class="fs-17">Como crescer profissionalmente na Carrinho</h5>
                                             </a>
-                                            <p class="text-muted">One disadvantage of Lorum Ipsum is that in Latin certain letters
-                                                appear more frequently than others.</p>
-                                            <a href="blog-details.html" class="form-text text-primary">Read more <i class="mdi mdi-chevron-right align-middle"></i></a>
+                                            <p class="text-muted">Invista em aprendizado contínuo, participe de projetos internos e busque feedbacks para evoluir na sua carreira.</p>
+                                            <a href="blog-details.html" class="form-text text-primary">Leia mais <i class="mdi mdi-chevron-right align-middle"></i></a>
                                         </div>
                                     </div><!--end blog-box-->
                                 </div><!--end col-->
@@ -764,7 +741,7 @@
                     <!-- END BLOG -->
 
                     <!-- START CLIENT -->
-                    <div class="py-4">
+                    <!-- <div class="py-4">
                         <div class="container">
                             <div class="row">
                                 <div class="col-lg-2">
@@ -774,7 +751,6 @@
                                         </a>
                                     </div>
                                 </div>
-                                <!--end col-->
                                 <div class="col-lg-2">
                                     <div class="text-center p-3">
                                         <a href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Envato">
@@ -782,7 +758,6 @@
                                         </a>
                                     </div>
                                 </div>
-                                <!--end col-->
                                 <div class="col-lg-2">
                                     <div class="text-center p-3">
                                         <a href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Magento">
@@ -790,7 +765,6 @@
                                         </a>
                                     </div>
                                 </div>
-                                <!--end col-->
                                 <div class="col-lg-2">
                                     <div class="text-center p-3">
                                         <a href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Wordpress">
@@ -798,7 +772,6 @@
                                         </a>
                                     </div>
                                 </div>
-                                <!--end col-->
                                 <div class="col-lg-2">
                                     <div class="text-center p-3">
                                         <a href="javascript:void(0)" data-bs-toggle="tooltip" data-bs-placement="top" title="" data-bs-original-title="Generic">
@@ -814,10 +787,8 @@
                                     </div>
                                 </div>
                             </div>
-                            <!--end row-->
                         </div>
-                        <!--end container-->
-                    </div>
+                    </div> -->
                     <!-- END CLIENT -->
 
                     <!-- START APPLY MODAL -->
@@ -883,6 +854,18 @@
         
         <!-- App Js -->
         <script src="assets/js/app.js"></script>
-       
+    <style>
+    .mailchimp-avatar {
+        width: 90px;
+        height: 90px;
+        overflow: hidden;
+        border-radius: 50%;
+    }
+    .mailchimp-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    </style>
     </body>
 </html>
