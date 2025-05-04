@@ -1,5 +1,5 @@
 <!-- START TOP-BAR -->
-<div class="top-bar">
+<div class="top-bar job-list-vue-app-0-0">
     <div class="container-fluid custom-container">
         <div class="row g-0 align-items-center">
             <div class="col-md-7">
@@ -20,11 +20,17 @@
                 </ul>
             </div>
             <!--end col-->
-            <div class="col-md-5">
+            <div class="col-md-5" >
                 <ul class="list-inline mb-0 text-center text-md-end">
                     <li class="list-inline-item py-2 me-2 align-middle">
-                        <a href="#signupModal" class="text-dark fw-medium fs-13" data-bs-toggle="modal"><i class="uil uil-lock"></i>
+                        <a href="/sign-up.html" class="text-dark fw-medium fs-13" v-if="!isUserLogger"><i class="uil uil-lock"></i>
                             Cadastrar-se</a>
+                        <a href="javascript:void(0)" class="text-dark fw-medium fs-13" v-else>
+                            
+                            <span class="ms-1" style="color: #00a5bb; font-size: 10px;">
+                                <i class="uil uil-apps" style="vertical-align: middle;"></i> Portal do Candidato
+                            </span>
+                        </a>
                     </li>
                     <!-- <li class="list-inline-item align-middle">
                         <div class="dropdown d-inline-block language-switch">
@@ -67,7 +73,7 @@
 <!-- END TOP-BAR -->
 
 <!--Navbar Start-->
-<nav class="navbar navbar-expand-lg fixed-top sticky uu-vue" id="navbar">
+<nav class="navbar navbar-expand-lg fixed-top sticky job-list-vue-app-0" id="navbar">
  
     <div class="container-fluid custom-container">
         <a class="navbar-brand text-dark fw-bold me-auto" href="index.html">
@@ -87,7 +93,7 @@
                     <a href="index.html" class="nav-link">Início</a>
                 </li>
                 
-                <li class="nav-item dropdown dropdown-hover">
+                <!-- <li class="nav-item dropdown dropdown-hover">
                     <a class="nav-link" href="javascript:void(0)" id="jobsdropdown" role="button" data-bs-toggle="dropdown">
                         Company <div class="arrow-down"></div>
                     </a>
@@ -99,8 +105,8 @@
                         <a class="dropdown-item" href="privacy-policy.html">Priacy & Policy</a>
                         <li><a class="dropdown-item" href="faqs.html">Faqs</a></li>
                     </ul>
-                </li>
-                <li class="nav-item dropdown dropdown-hover">
+                </li> -->
+                <!-- <li class="nav-item dropdown dropdown-hover">
                     <a class="nav-link" href="javascript:void(0)" id="pagesdoropdown" role="button" data-bs-toggle="dropdown">
                         Pages
                         <div class="arrow-down"></div>
@@ -117,7 +123,7 @@
                                     <a class="dropdown-item" href="job-details.html">Job Details</a>
                                     <a class="dropdown-item" href="job-categories.html">Jobs Categories</a>
                                 </div>
-                            </div><!--end col-->
+                            </div>
                             <div class="col-lg-4">
                                 <span class="dropdown-header">Candidates / Companys</span>
                                 <div>
@@ -127,7 +133,7 @@
                                     <a class="dropdown-item" href="company-list.html">Company List</a>
                                     <a class="dropdown-item" href="company-details.html">Company Details</a>
                                 </div>
-                            </div><!--end col-->
+                            </div>
                             <div class="col-lg-4">
                                 <span class="dropdown-header">Extra Pages</span>
                                 <div>
@@ -139,11 +145,11 @@
                                     <a class="dropdown-item" href="404-error.html">404 Error</a>
                                     <a class="dropdown-item" href="components.html">Components</a>
                                 </div>
-                            </div><!--end col-->
+                            </div>
                         </div>
                     </div>
-                </li><!--end dropdown-->
-                <li class="nav-item dropdown dropdown-hover">
+                </li> --><!--end dropdown-->
+                <!-- <li class="nav-item dropdown dropdown-hover">
                     <a class="nav-link" href="javascript:void(0)" id="productdropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                         Blog 
                         <div class="arrow-down"></div>
@@ -156,10 +162,19 @@
                         <li><a class="dropdown-item" href="blog-details.html">Blog details</a></li>
                         <li><a class="dropdown-item" href="blog-author.html">Blog Author</a></li>
                     </ul>
-                </li><!--end dropdown-->
+                </li> --><!--end dropdown-->
                 <li class="nav-item">
-                    <a href="contact.html" class="nav-link">Contact</a>
+                    <a href="job-list.html" class="nav-link">Vagas</a>
                 </li>
+                <li class="nav-item">
+                    <a href="/manage-jobs.html" class="nav-link">Minhas Candidaturas</a>
+                </li>
+                <li class="nav-item">
+                    <a href="bookmark-jobs.html" class="nav-link">Favoritos</a>
+                </li>
+                <!-- <li class="nav-item">
+                    <a href="contact.html" class="nav-link">Contact</a>
+                </li> -->
             </ul><!--end navbar-nav-->
 
         </div>
@@ -258,11 +273,11 @@
             <li class="list-inline-item dropdown" v-if="isUserLogger">
                 <a href="javascript:void(0)" class="header-item" id="userdropdown" data-bs-toggle="dropdown"
                     aria-expanded="false">
-                    <img src="assets/images/profile.jpg" alt="mdo" width="35" height="35" class="rounded-circle me-1"> <span class="d-none d-md-inline-block fw-medium">Admin</span>
+                    <img src="assets/images/profile.jpg" alt="mdo" width="35" height="35" class="rounded-circle me-1"> <span class="d-none d-md-inline-block fw-medium">{{userLogger.email.split('@')[0]}}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userdropdown">
-                    <li><a class="dropdown-item" href="manage-jobs.html">Gerenciar Vagas</a></li>
-                    <li><a class="dropdown-item" href="bookmark-jobs.html">Vagas Salvas</a></li>
+                    <li><a class="dropdown-item" href="manage-jobs.html">Minhas Candidaturas</a></li>
+                    <li><a class="dropdown-item" href="bookmark-jobs.html">Favoritos</a></li>
                     <li><a class="dropdown-item" href="profile.html">Meu Perfil</a></li>
                     <li><a class="dropdown-item" @click="logout()">Sair</a></li>
                 </ul>
@@ -332,7 +347,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     window.vueApp({
                         data() {
                             return {
-                                user: "sf",
                             }
                         },
                         computed: {
@@ -341,7 +355,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             },
                             userLogger() {
                                 const user = localStorage.getItem('user')
-                                return user ? JSON.parse('user') : null;
+                                return user ? JSON.parse(user) : null;
                             }
                         },
                         methods: {
@@ -352,8 +366,20 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         },
                         mounted() {
-                            // localStorage.setItem('user', JSON.stringify({name: 'John Doe', email: 'ma@mail.com'}));
                         }
-                    }).mount('.uu-vue');
+                    }).mount('.job-list-vue-app-0');
+
+
+                    window.vueApp({
+                        data() {
+                            return {
+                            }
+                        },
+                        computed: {
+                            isUserLogger() {
+                                return !!localStorage.getItem('user');
+                            }}
+                    
+                    }).mount('.job-list-vue-app-0-0');
                     });
 </script>

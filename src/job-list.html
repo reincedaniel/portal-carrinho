@@ -2,7 +2,7 @@
 
 <head>
 
-    @@include("partials/title-meta.html", {"title": "Job List"})
+    @@include("partials/title-meta.html", {"title": "Vagas"})
 
     <!-- Choise Css -->
     <link rel="stylesheet" href="assets/libs/choices.js/public/assets/styles/choices.min.css">
@@ -10,6 +10,137 @@
     <!-- Nouislider Css -->
     <link rel="stylesheet" href="assets/libs/nouislider/nouislider.min.css">
     @@include("partials/head-css.html")
+
+    <script>
+                               
+        document.addEventListener('DOMContentLoaded', function () {
+            
+    
+            window.vueApp({
+        data() {
+            return {
+                jobs: [],
+                jobCategories: [],
+                loading: true,
+                jobsRaw:null,
+                jobText:"", 
+                jobLocation:"", 
+                jobCategory:""
+            }
+        },
+        computed: {
+            filteredJobs() {
+                if (!Array.isArray(this.jobs) || this.jobs.length === 0) {
+                    return [];
+                }
+                return this.jobs.slice(0, 3);
+            },
+            filteredCategory() {
+                if (!Array.isArray(this.jobCategories) || this.jobCategories.length === 0) {
+                    return [];
+                }
+                return this.jobCategories.slice(0, 5);
+            },
+            isUserLogger() {
+                return !!localStorage.getItem('user');
+            },
+            userLogger() {
+                const user = localStorage.getItem('user')
+                return user ? JSON.parse('user') : null;
+            }              
+        },
+        methods: {
+            getIntFromString(str) {
+                if (!str) return null;
+                return parseInt(str, 10);
+            },
+            initFromUrl() {
+                const params = new URLSearchParams(window.location.search);
+                const categoryId = params.get('category-id');
+                const jobText = params.get('job-text');
+                if (categoryId || jobText) {
+                    this.jobCategory = categoryId || "";
+                    this.jobText = jobText || "";
+                    this.getJob({
+                        CategoryId: categoryId || "",
+                        jobText: jobText || ""
+                    });
+                }else {
+                    this.getJob({});
+                }
+            },
+            clearFilter() {
+                this.jobText = "";
+                this.jobLocation = "";
+                this.jobCategory = "";
+                this.loading = "";
+                this.getJob({
+                    jobText: this.jobText,
+                    jobLocation: this.jobLocation,
+                    jobCategory: this.jobCategory
+                });
+                if (window.history && window.history.replaceState) {
+                    const url = window.location.origin + window.location.pathname;
+                    window.history.replaceState({}, document.title, url);
+                }
+            },
+            filterJob() {
+               
+              /*   debugger */
+                this.getJob({
+                    jobText: this.jobText,
+                    Location: this.jobLocation,
+                    CategoryId: this.jobCategory
+                });
+            },
+            formatDate(dateString) {
+                if (!dateString) return '';
+                const options = { year: 'numeric', month: 'long', day: 'numeric' };
+                return new Date(dateString).toLocaleDateString('pt-BR', options);
+            },
+            getJobCategory() {
+                fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job/category?isActive=true')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.jobCategories = data?.data || [];
+                    })
+                    .catch(() => {
+                        this.jobCategories = [];
+                    });
+            },
+            getJob(params = {}) {
+                this.loading = true;
+                const query = new URLSearchParams();
+                if (params.CategoryId) query.append('CategoryId', params.CategoryId);
+                if (params.Location) query.append('Location', params.Location);
+                if (params.jobText) query.append('jobText', params.jobText);
+
+                const url = 'https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job' + (query.toString() ? `?${query}` : '');
+
+                fetch(url)
+                    .then(res => res.json())
+                    .then(data => {
+                        this.jobsRaw = data;
+                        this.jobs = data?.data?.data || [];
+                    })
+                    .catch(() => {
+                        this.jobs = [];
+                    })
+                    .finally(() => {
+                        this.loading = false;
+                    });
+            }
+        },
+        mounted() {
+            
+            this.getJobCategory()
+            this.initFromUrl()
+        }
+    }).mount('#job-list-vue-app-2');
+    });
+
+    
+    </script>
 
 </head>
 
@@ -21,11 +152,11 @@
     @@include("partials/topbar.html")
 
 
-    <div class="main-content">
+    <div class="main-content" id="job-list-vue-app-2">
 
         <div class="page-content">
 
-            @@include("partials/page-title.html",{"pagetitle":"Pages","title":"Job List"})
+            @@include("partials/page-title.html",{"pagetitle":"Página","title":"Vagas"})
 
             <!-- START JOB-LIST -->
             <section class="section">
@@ -38,279 +169,62 @@
                                         <div class="row g-2">
                                             <div class="col-lg-3 col-md-6">
                                                 <div class="filler-job-form">
-                                                    <i class="uil uil-briefcase-alt"></i>
-                                                    <input type="search" class="form-control filter-job-input-box" id="exampleFormControlInput1" placeholder="Job, company... ">
+                                                    <!-- <i class="uil uil-briefcase-alt"></i> -->
+                                                    <label for="search" class="form-label text-secondary">Nome da Vaga</label>
+                                                    
+                                                    <input type="search" class="form-control text-primary" v-model="jobText"  placeholder="Nome da Vaga">
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-3 col-md-6">
                                                 <div class="filler-job-form">
-                                                    <i class="uil uil-location-point"></i>
-                                                    <select class="form-select" data-trigger name="choices-single-location" id="choices-single-location" aria-label="Default select example">
-                                                        <option value="AF">Afghanistan</option>
-                                                        <option value="AX">&Aring;land Islands</option>
-                                                        <option value="AL">Albania</option>
-                                                        <option value="DZ">Algeria</option>
-                                                        <option value="AS">American Samoa</option>
-                                                        <option value="AD">Andorra</option>
-                                                        <option value="AO">Angola</option>
-                                                        <option value="AI">Anguilla</option>
-                                                        <option value="AQ">Antarctica</option>
-                                                        <option value="AG">Antigua and Barbuda</option>
-                                                        <option value="AR">Argentina</option>
-                                                        <option value="AM">Armenia</option>
-                                                        <option value="AW">Aruba</option>
-                                                        <option value="AU">Australia</option>
-                                                        <option value="AT">Austria</option>
-                                                        <option value="AZ">Azerbaijan</option>
-                                                        <option value="BS">Bahamas</option>
-                                                        <option value="BH">Bahrain</option>
-                                                        <option value="BD">Bangladesh</option>
-                                                        <option value="BB">Barbados</option>
-                                                        <option value="BY">Belarus</option>
-                                                        <option value="BE">Belgium</option>
-                                                        <option value="BZ">Belize</option>
-                                                        <option value="BJ">Benin</option>
-                                                        <option value="BM">Bermuda</option>
-                                                        <option value="BT">Bhutan</option>
-                                                        <option value="BO">Bolivia, Plurinational State of</option>
-                                                        <option value="BA">Bosnia and Herzegovina</option>
-                                                        <option value="BW">Botswana</option>
-                                                        <option value="BV">Bouvet Island</option>
-                                                        <option value="BR">Brazil</option>
-                                                        <option value="IO">British Indian Ocean Territory</option>
-                                                        <option value="BN">Brunei Darussalam</option>
-                                                        <option value="BG">Bulgaria</option>
-                                                        <option value="BF">Burkina Faso</option>
-                                                        <option value="BI">Burundi</option>
-                                                        <option value="KH">Cambodia</option>
-                                                        <option value="CM">Cameroon</option>
-                                                        <option value="CA">Canada</option>
-                                                        <option value="CV">Cape Verde</option>
-                                                        <option value="KY">Cayman Islands</option>
-                                                        <option value="CF">Central African Republic</option>
-                                                        <option value="TD">Chad</option>
-                                                        <option value="CL">Chile</option>
-                                                        <option value="CN">China</option>
-                                                        <option value="CX">Christmas Island</option>
-                                                        <option value="CC">Cocos (Keeling) Islands</option>
-                                                        <option value="CO">Colombia</option>
-                                                        <option value="KM">Comoros</option>
-                                                        <option value="CG">Congo</option>
-                                                        <option value="CD">Congo, the Democratic Republic of the</option>
-                                                        <option value="CK">Cook Islands</option>
-                                                        <option value="CR">Costa Rica</option>
-                                                        <option value="CI">C&ocirc;te d'Ivoire</option>
-                                                        <option value="HR">Croatia</option>
-                                                        <option value="CU">Cuba</option>
-                                                        <option value="CY">Cyprus</option>
-                                                        <option value="CZ">Czech Republic</option>
-                                                        <option value="DK">Denmark</option>
-                                                        <option value="DJ">Djibouti</option>
-                                                        <option value="DM">Dominica</option>
-                                                        <option value="DO">Dominican Republic</option>
-                                                        <option value="EC">Ecuador</option>
-                                                        <option value="EG">Egypt</option>
-                                                        <option value="SV">El Salvador</option>
-                                                        <option value="GQ">Equatorial Guinea</option>
-                                                        <option value="ER">Eritrea</option>
-                                                        <option value="EE">Estonia</option>
-                                                        <option value="ET">Ethiopia</option>
-                                                        <option value="FK">Falkland Islands (Malvinas)</option>
-                                                        <option value="FO">Faroe Islands</option>
-                                                        <option value="FJ">Fiji</option>
-                                                        <option value="FI">Finland</option>
-                                                        <option value="FR">France</option>
-                                                        <option value="GF">French Guiana</option>
-                                                        <option value="PF">French Polynesia</option>
-                                                        <option value="TF">French Southern Territories</option>
-                                                        <option value="GA">Gabon</option>
-                                                        <option value="GM">Gambia</option>
-                                                        <option value="GE">Georgia</option>
-                                                        <option value="DE">Germany</option>
-                                                        <option value="GH">Ghana</option>
-                                                        <option value="GI">Gibraltar</option>
-                                                        <option value="GR">Greece</option>
-                                                        <option value="GL">Greenland</option>
-                                                        <option value="GD">Grenada</option>
-                                                        <option value="GP">Guadeloupe</option>
-                                                        <option value="GU">Guam</option>
-                                                        <option value="GT">Guatemala</option>
-                                                        <option value="GG">Guernsey</option>
-                                                        <option value="GN">Guinea</option>
-                                                        <option value="GW">Guinea-Bissau</option>
-                                                        <option value="GY">Guyana</option>
-                                                        <option value="HT">Haiti</option>
-                                                        <option value="HM">Heard Island and McDonald Islands</option>
-                                                        <option value="VA">Holy See (Vatican City State)</option>
-                                                        <option value="HN">Honduras</option>
-                                                        <option value="HK">Hong Kong</option>
-                                                        <option value="HU">Hungary</option>
-                                                        <option value="IS">Iceland</option>
-                                                        <option value="IN">India</option>
-                                                        <option value="ID">Indonesia</option>
-                                                        <option value="IR">Iran, Islamic Republic of</option>
-                                                        <option value="IQ">Iraq</option>
-                                                        <option value="IE">Ireland</option>
-                                                        <option value="IM">Isle of Man</option>
-                                                        <option value="IL">Israel</option>
-                                                        <option value="IT">Italy</option>
-                                                        <option value="JM">Jamaica</option>
-                                                        <option value="JP">Japan</option>
-                                                        <option value="JE">Jersey</option>
-                                                        <option value="JO">Jordan</option>
-                                                        <option value="KZ">Kazakhstan</option>
-                                                        <option value="KE">Kenya</option>
-                                                        <option value="KI">Kiribati</option>
-                                                        <option value="KP">Korea, Democratic People's Republic of</option>
-                                                        <option value="KR">Korea, Republic of</option>
-                                                        <option value="KW">Kuwait</option>
-                                                        <option value="KG">Kyrgyzstan</option>
-                                                        <option value="LA">Lao People's Democratic Republic</option>
-                                                        <option value="LV">Latvia</option>
-                                                        <option value="LB">Lebanon</option>
-                                                        <option value="LS">Lesotho</option>
-                                                        <option value="LR">Liberia</option>
-                                                        <option value="LY">Libyan Arab Jamahiriya</option>
-                                                        <option value="LI">Liechtenstein</option>
-                                                        <option value="LT">Lithuania</option>
-                                                        <option value="LU">Luxembourg</option>
-                                                        <option value="MO">Macao</option>
-                                                        <option value="MK">Macedonia, the former Yugoslav Republic of</option>
-                                                        <option value="MG">Madagascar</option>
-                                                        <option value="MW">Malawi</option>
-                                                        <option value="MY">Malaysia</option>
-                                                        <option value="MV">Maldives</option>
-                                                        <option value="ML">Mali</option>
-                                                        <option value="MT">Malta</option>
-                                                        <option value="MH">Marshall Islands</option>
-                                                        <option value="MQ">Martinique</option>
-                                                        <option value="MR">Mauritania</option>
-                                                        <option value="MU">Mauritius</option>
-                                                        <option value="YT">Mayotte</option>
-                                                        <option value="MX">Mexico</option>
-                                                        <option value="FM">Micronesia, Federated States of</option>
-                                                        <option value="MD">Moldova, Republic of</option>
-                                                        <option value="MC">Monaco</option>
-                                                        <option value="MN">Mongolia</option>
-                                                        <option value="ME">Montenegro</option>
-                                                        <option value="MS">Montserrat</option>
-                                                        <option value="MA">Morocco</option>
-                                                        <option value="MZ">Mozambique</option>
-                                                        <option value="MM">Myanmar</option>
-                                                        <option value="NA">Namibia</option>
-                                                        <option value="NR">Nauru</option>
-                                                        <option value="NP">Nepal</option>
-                                                        <option value="NL">Netherlands</option>
-                                                        <option value="AN">Netherlands Antilles</option>
-                                                        <option value="NC">New Caledonia</option>
-                                                        <option value="NZ">New Zealand</option>
-                                                        <option value="NI">Nicaragua</option>
-                                                        <option value="NE">Niger</option>
-                                                        <option value="NG">Nigeria</option>
-                                                        <option value="NU">Niue</option>
-                                                        <option value="NF">Norfolk Island</option>
-                                                        <option value="MP">Northern Mariana Islands</option>
-                                                        <option value="NO">Norway</option>
-                                                        <option value="OM">Oman</option>
-                                                        <option value="PK">Pakistan</option>
-                                                        <option value="PW">Palau</option>
-                                                        <option value="PS">Palestinian Territory, Occupied</option>
-                                                        <option value="PA">Panama</option>
-                                                        <option value="PG">Papua New Guinea</option>
-                                                        <option value="PY">Paraguay</option>
-                                                        <option value="PE">Peru</option>
-                                                        <option value="PH">Philippines</option>
-                                                        <option value="PN">Pitcairn</option>
-                                                        <option value="PL">Poland</option>
-                                                        <option value="PT">Portugal</option>
-                                                        <option value="PR">Puerto Rico</option>
-                                                        <option value="QA">Qatar</option>
-                                                        <option value="RE">R&eacute;union</option>
-                                                        <option value="RO">Romania</option>
-                                                        <option value="RU">Russian Federation</option>
-                                                        <option value="RW">Rwanda</option>
-                                                        <option value="BL">Saint Barth&eacute;lemy</option>
-                                                        <option value="SH">Saint Helena, Ascension and Tristan da Cunha</option>
-                                                        <option value="KN">Saint Kitts and Nevis</option>
-                                                        <option value="LC">Saint Lucia</option>
-                                                        <option value="MF">Saint Martin (French part)</option>
-                                                        <option value="PM">Saint Pierre and Miquelon</option>
-                                                        <option value="VC">Saint Vincent and the Grenadines</option>
-                                                        <option value="WS">Samoa</option>
-                                                        <option value="SM">San Marino</option>
-                                                        <option value="ST">Sao Tome and Principe</option>
-                                                        <option value="SA">Saudi Arabia</option>
-                                                        <option value="SN">Senegal</option>
-                                                        <option value="RS">Serbia</option>
-                                                        <option value="SC">Seychelles</option>
-                                                        <option value="SL">Sierra Leone</option>
-                                                        <option value="SG">Singapore</option>
-                                                        <option value="SK">Slovakia</option>
-                                                        <option value="SI">Slovenia</option>
-                                                        <option value="SB">Solomon Islands</option>
-                                                        <option value="SO">Somalia</option>
-                                                        <option value="ZA">South Africa</option>
-                                                        <option value="GS">South Georgia and the South Sandwich Islands</option>
-                                                        <option value="ES">Spain</option>
-                                                        <option value="LK">Sri Lanka</option>
-                                                        <option value="SD">Sudan</option>
-                                                        <option value="SR">Suriname</option>
-                                                        <option value="SJ">Svalbard and Jan Mayen</option>
-                                                        <option value="SZ">Swaziland</option>
-                                                        <option value="SE">Sweden</option>
-                                                        <option value="CH">Switzerland</option>
-                                                        <option value="SY">Syrian Arab Republic</option>
-                                                        <option value="TW">Taiwan, Province of China</option>
-                                                        <option value="TJ">Tajikistan</option>
-                                                        <option value="TZ">Tanzania, United Republic of</option>
-                                                        <option value="TH">Thailand</option>
-                                                        <option value="TL">Timor-Leste</option>
-                                                        <option value="TG">Togo</option>
-                                                        <option value="TK">Tokelau</option>
-                                                        <option value="TO">Tonga</option>
-                                                        <option value="TT">Trinidad and Tobago</option>
-                                                        <option value="TN">Tunisia</option>
-                                                        <option value="TR">Turkey</option>
-                                                        <option value="TM">Turkmenistan</option>
-                                                        <option value="TC">Turks and Caicos Islands</option>
-                                                        <option value="TV">Tuvalu</option>
-                                                        <option value="UG">Uganda</option>
-                                                        <option value="UA">Ukraine</option>
-                                                        <option value="AE">United Arab Emirates</option>
-                                                        <option value="GB">United Kingdom</option>
-                                                        <option value="US">United States</option>
-                                                        <option value="UM">United States Minor Outlying Islands</option>
-                                                        <option value="UY">Uruguay</option>
-                                                        <option value="UZ">Uzbekistan</option>
-                                                        <option value="VU">Vanuatu</option>
-                                                        <option value="VE">Venezuela, Bolivarian Republic of</option>
-                                                        <option value="VN">Viet Nam</option>
-                                                        <option value="VG">Virgin Islands, British</option>
-                                                        <option value="VI">Virgin Islands, U.S.</option>
-                                                        <option value="WF">Wallis and Futuna</option>
-                                                        <option value="EH">Western Sahara</option>
-                                                        <option value="YE">Yemen</option>
-                                                        <option value="ZM">Zambia</option>
-                                                        <option value="ZW">Zimbabwe</option>
+                                                    <!-- <i class="uil uil-location-point"></i> -->
+                                                    <label for="location" class="form-label text-secondary">Localização</label>
+                                                    <select v-model="jobLocation" class="form-select text-primary" aria-label="Default select example">
+                                                        <option value="">Todas</option>
+                                                        <option value="Bengo">Bengo</option>
+                                                        <option value="Benguela">Benguela</option>
+                                                        <option value="Bié">Bié</option>
+                                                        <option value="Cabinda">Cabinda</option>
+                                                        <option value="Cuando Cubango">Cuando Cubango</option>
+                                                        <option value="Cuanza Norte">Cuanza Norte</option>
+                                                        <option value="Cuanza Sul">Cuanza Sul</option>
+                                                        <option value="Cunene">Cunene</option>
+                                                        <option value="Huambo">Huambo</option>
+                                                        <option value="Huíla">Huíla</option>
+                                                        <option value="Luanda">Luanda</option>
+                                                        <option value="Lunda Norte">Lunda Norte</option>
+                                                        <option value="Lunda Sul">Lunda Sul</option>
+                                                        <option value="Malanje">Malanje</option>
+                                                        <option value="Moxico">Moxico</option>
+                                                        <option value="Namibe">Namibe</option>
+                                                        <option value="Uíge">Uíge</option>
+                                                        <option value="Zaire">Zaire</option>
                                                     </select>
                                                 </div>
                                             </div>
                                             <!--end col-->
                                             <div class="col-lg-3 col-md-6">
                                                 <div class="filler-job-form">
-                                                    <i class="uil uil-clipboard-notes"></i>
-                                                    <select class="form-select " data-trigger name="choices-single-categories" id="choices-single-categories" aria-label="Default select example">
-                                                        <option value="4">Accounting</option>
-                                                        <option value="1">IT & Software</option>
-                                                        <option value="3">Marketing</option>
-                                                        <option value="5">Banking</option>
+                                                    <label for="category" class="form-label text-secondary">Categoria</label>
+
+                                                    <select v-model="jobCategory" class="form-select text-primary" aria-label="Default select example">
+                                                        <option value="">Todas</option>
+                                                        <option :value="category.id" v-for="category in jobCategories" :key="category.id">{{category.category}}</option>
+                                                       
                                                     </select>
                                                 </div>
                                             </div>
+
+
                                             <!--end col-->
                                             <div class="col-lg-3 col-md-6">
-                                                <a href="javascript:void(0)" class="btn btn-primary w-100"><i class="uil uil-filter"></i> Fliter</a>
+                                                <label for="buttons" class="form-label text-white ">.</label>
+
+                                                <button type="button" @click="filterJob()" class="btn btn-primary  w-100 "><i class="uil uil-filter"></i> Buscar</button>
+                                                <button type="button" @click="clearFilter()" class="btn btn-outline-secondary w-100 mt-2">
+                                                    <i class="uil uil-times"></i> Limpar
+                                                </button>
                                             </div>
                                             <!--end col-->
                                         </div>
@@ -324,604 +238,145 @@
                                         <li class="list-inline-item">
                                             <div class="popular-box d-flex align-items-center">
                                                 <div class="number flex-shrink-0 me-2">
-                                                    20
+                                                    #
                                                 </div>
-                                                <a href="javascript:void(0)" class="primary-link stretched-link">
-                                                    <h6 class="fs-14 mb-0">UI/UX designer</h6>
+                                                <a href="javascript:void(0)" @click="()=>{getJob({}); jobCategory=''}" class="stretched-link" :class="!jobCategory ?'':'primary-link'">
+                                                    <h6 class="fs-14 mb-0">Todas vagas</h6>
                                                 </a>
+                                                
                                             </div>
                                         </li>
-                                        <li class="list-inline-item">
+                                        <li v-for="cat in filteredCategory" :key="cat.id" class="list-inline-item">
                                             <div class="popular-box d-flex align-items-center">
                                                 <div class="number flex-shrink-0 me-2">
-                                                    18
+                                                    #
                                                 </div>
-                                                <a href="javascript:void(0)" class="primary-link stretched-link">
-                                                    <h6 class="fs-14 mb-0">HR manager</h6>
+                                                
+                                                <a href="javascript:void(0)" @click="()=>{getJob({CategoryId:cat.id}); jobCategory=cat.id}" class="stretched-link" :class="cat.id ===getIntFromString(jobCategory)?'':'primary-link'">
+                                                    <h6 class="fs-14 mb-0">{{cat.category}}</h6>
                                                 </a>
                                             </div>
                                         </li>
-                                        <li class="list-inline-item">
-                                            <div class="popular-box d-flex align-items-center">
-                                                <div class="number flex-shrink-0 me-2">
-                                                    10
-                                                </div>
-                                                <a href="javascript:void(0)" class="primary-link stretched-link">
-                                                    <h6 class="fs-14 mb-0">Product manager</h6>
-                                                </a>
-                                            </div>
-                                        </li>
-                                        <li class="list-inline-item">
-                                            <div class="popular-box d-flex align-items-center">
-                                                <div class="number flex-shrink-0 me-2">
-                                                    15
-                                                </div>
-                                                <a href="javascript:void(0)" class="primary-link stretched-link">
-                                                    <h6 class="fs-14 mb-0">Sales manager</h6>
-                                                </a>
-                                            </div>
-                                        </li>
-                                        <li class="list-inline-item">
-                                            <div class="popular-box d-flex align-items-center">
-                                                <div class="number flex-shrink-0 me-2">
-                                                    28
-                                                </div>
-                                                <a href="javascript:void(0)" class="primary-link stretched-link">
-                                                    <h6 class="fs-14 mb-0">Developer</h6>
-                                                </a>
-                                            </div>
-                                        </li>
+                                       
                                     </ul>
                                 </div>
                                 <!--end wedget-popular-title-->
                                 <!-- Job-list -->
-                                <div>
-                                    <div class="job-box card mt-5">
+                                <div v-if="!loading">
+                                    <div v-for="job in jobs" :key="job.id" class="job-box card mt-4" style="cursor: pointer;">
                                         <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
-                                        </div>
-                                        <div class="p-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <div class="text-center mb-4 mb-lg-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-01.png" alt="" class="img-fluid rounded-3"></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Product
-                                                                Director</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Creative Agency</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="d-flex mb-2">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="mdi mdi-map-marker text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted"> Escondido,California</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 3 min ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div>
-                                                        <span class="badge bg-success-subtle text-success fs-13 mt-1">Full Time</span>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                        <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
-                                                <div class="col-md-4">
-                                                    <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span> 2
-                                                            - 3 years</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-lg-2 col-md-3">
-                                                    <div class="text-start text-md-end">
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                    </div>
-                                    <!--end job-box-->
-
-                                    <div class="job-box bookmark-post card mt-4">
-                                        <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
+                                            <a href="javascript:void(0)" class="text-white align-middle"><i class="mdi mdi-star"></i></a>
                                         </div>
                                         <div class="p-4">
                                             <div class="row align-items-center">
                                                 <div class="col-md-2">
                                                     <div class="text-center mb-4 mb-md-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-02.png" alt="" class="img-fluid rounded-3"></a>
+                                                        <!--  company-details.html-->
+                                                        <a :href="`job-details.html?job-id=${job.id}`"><img src="assets/images/featured-job/img-01.png" alt="" class="img-fluid rounded-3"></a>
                                                     </div>
                                                 </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
+                                                <div class="col-md-6">
                                                     <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Digital Marketing
-                                                                Manager</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Jobcy Technology Pvt.Ltd</p>
+                                                        <h5 class="fs-18 mb-1"><a :href="`job-details.html?job-id=${job.id}`" class="text-dark">{{job.title}}</a>
+                                                        </h5>
+                                                        <p class="text-muted fs-14 mb-0">Publicação: {{formatDate(job.createdAt)}}</p>
                                                     </div>
                                                 </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="d-flex mb-2">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="mdi mdi-map-marker text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0">Phoenix, Arizona</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
+                                             
                                                 <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 15 min ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div>
-                                                        <span class="badge bg-success-subtle text-success fs-13 mt-1">Full Time</span>
-                                                        <span class="badge bg-warning-subtle text-warning fs-13 mt-1">Urgent</span>
-                                                        <span class="badge bg-primary-subtle text-primary fs-13 mt-1">Freelance</span>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                        <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
-                                                <div class="col-md-4">
-                                                    <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span>
-                                                            4+ years</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-lg-2 col-md-3">
-                                                    <div>
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                    </div>
-                                    <!--end job-box-->
+                                                    
 
-                                    <div class="job-box card mt-4">
-                                        <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
-                                        </div>
-                                        <div class="p-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <div class="text-center mb-4 mb-lg-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-03.png" alt="" class="img-fluid rounded-3"></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Product
-                                                                Director</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Creative Agency</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
                                                     <div class="d-flex mb-2">
                                                         <div class="flex-shrink-0">
                                                             <i class="mdi mdi-map-marker text-primary me-1"></i>
                                                         </div>
-                                                        <p class="text-muted mb-0">Escondido, California</p>
+                                                        <p class="text-muted mb-0">{{job.location}}</p>
                                                     </div>
                                                 </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 37 min ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
                                                 <div class="col-md-2">
                                                     <div>
-                                                        <span class="badge bg-info-subtle text-info fs-13 mt-1">Internship</span>
+                                                        <span class="badge bg-dark-subtle text-black fs-13 mt-1">Tempo Integral</span>
+                                                       
                                                     </div>
                                                 </div>
-                                                <!--end col-->
                                             </div>
-                                            <!--end row-->
                                         </div>
                                         <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
+                                            <div class="row">
                                                 <div class="col-md-4">
                                                     <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span> 2
-                                                            - 3 years</p>
+                                                        <p class="text-muted mb-0"><span class="text-dark">Experiência :</span> <span class="ml-5">{{job.experienceScore}}</span>/10</p>
                                                     </div>
                                                 </div>
-                                                <!--end col-->
+                                                <div class="col-lg-6 col-md-5">
+                                                    
+                                                </div>
                                                 <div class="col-lg-2 col-md-3">
                                                     <div class="text-start text-md-end">
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
+                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link fw-bold text-primary" style="font-weight: bold; color: #00a5bb !important;">
+                                                            Candidatar-se <i class="mdi mdi-chevron-double-right"></i>
+                                                        </a>
                                                     </div>
                                                 </div>
-                                                <!--end col-->
                                             </div>
-                                            <!--end row-->
                                         </div>
                                     </div>
-                                    <!--end job-box-->
 
-                                    <div class="job-box card mt-4">
-                                        <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
-                                        </div>
-                                        <div class="p-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <div class="text-center mb-4 mb-lg-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-04.png" alt="" class="img-fluid rounded-3"></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Product Director</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Creative Agency</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="d-flex mb-2">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="mdi mdi-map-marker text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0">Escondido, California</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 50 min ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div>
-                                                        <span class="badge bg-primary-subtle text-primary fs-13 mt-1">Freelance</span>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                        <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
-                                                <div class="col-md-4">
-                                                    <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span> 2 - 3 years</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-lg-2 col-md-3">
-                                                    <div class="text-start text-md-end">
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
+                                    <div v-if="jobs.length === 0" class="text-center mt-5">
+                                        <div class="alert alert-warning d-inline-block px-4 py-3" style="font-size: 1.1rem;">
+                                            <i class="mdi mdi-alert-circle-outline me-2"></i>
+                                            Nenhuma vaga encontrada.
                                         </div>
                                     </div>
-                                    <!--end job-box-->
-
-                                    <div class="job-box bookmark-post card mt-4">
-                                        <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
-                                        </div>
-                                        <div class="p-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <div class="text-center mb-4 mb-lg-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-05.png" alt="" class="img-fluid rounded-3"></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Product
-                                                                Director</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Creative Agency</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="d-flex mb-2">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="mdi mdi-map-marker text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0">Escondido, California</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 1 month ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div>
-                                                        <span class="badge bg-danger-subtle text-danger fs-13 mt-1">Part Time</span>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                        <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
-                                                <div class="col-md-4">
-                                                    <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span> 2 - 3 years</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-lg-2 col-md-3">
-                                                    <div>
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                    </div>
-                                    <!--end job-box-->
-
-                                    <div class="job-box card mt-4">
-                                        <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
-                                        </div>
-                                        <div class="p-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <div class="text-center mb-4 mb-lg-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-06.png" alt="" class="img-fluid rounded-3"></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Product
-                                                                Director</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Creative Agency</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="d-flex mb-2">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="mdi mdi-map-marker text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0">Escondido, California</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 2 month ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div>
-                                                        <span class="badge bg-primary-subtle text-primary fs-13 mt-1">Freelance</span>
-                                                        <span class="badge bg-warning-subtle text-warning fs-13 mt-1">Urgent</span>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                        <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
-                                                <div class="col-md-4">
-                                                    <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span> 2 - 3 years</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-lg-2 col-md-3">
-                                                    <div>
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                    </div>
-                                    <!--end job-box-->
-
-                                    <div class="job-box card mt-4">
-                                        <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
-                                        </div>
-                                        <div class="p-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <div class="text-center mb-4 mb-lg-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-07.png" alt="" class="img-fluid rounded-3"></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Product
-                                                                Director</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Creative Agency</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="d-flex mb-2">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="mdi mdi-map-marker text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0">Escondido, California</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 1 month ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div>
-                                                        <span class="badge bg-danger-subtle text-danger fs-13 mt-1">Part Time</span>
-                                                        <span class="badge bg-warning-subtle text-warning fs-13 mt-1">Urgent</span>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                        <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
-                                                <div class="col-md-4">
-                                                    <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span> 2 - 3 years</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-lg-2 col-md-3">
-                                                    <div>
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                    </div>
-                                    <!--end job-box-->
-
-                                    <div class="job-box card mt-4">
-                                        <div class="bookmark-label text-center">
-                                            <a href="javascript:void(0)" class="align-middle text-white"><i class="mdi mdi-star"></i></a>
-                                        </div>
-                                        <div class="p-4">
-                                            <div class="row align-items-center">
-                                                <div class="col-md-2">
-                                                    <div class="text-center mb-4 mb-lg-0">
-                                                        <a href="company-details.html"><img src="assets/images/featured-job/img-03.png" alt="" class="img-fluid rounded-3"></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="mb-2 mb-md-0">
-                                                        <h5 class="fs-18 mb-0"><a href="job-details.html" class="text-dark">Product
-                                                                Director</a></h5>
-                                                        <p class="text-muted fs-14 mb-0">Creative Agency</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-3">
-                                                    <div class="d-flex mb-2">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="mdi mdi-map-marker text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0">Escondido, California</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div class="d-flex mb-0">
-                                                        <div class="flex-shrink-0">
-                                                            <i class="uil uil-clock-three text-primary me-1"></i>
-                                                        </div>
-                                                        <p class="text-muted mb-0"> 3 month ago</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-md-2">
-                                                    <div>
-                                                        <span class="badge bg-info-subtle text-info  fs-13 mt-1">Internship</span>
-                                                        <span class="badge bg-primary-subtle text-primary fs-13 mt-1">Private</span>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                        <div class="p-3 bg-light">
-                                            <div class="row justify-content-between">
-                                                <div class="col-md-4">
-                                                    <div>
-                                                        <p class="text-muted mb-0"><span class="text-dark">Experience :</span> 2 - 3 years</p>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                                <div class="col-lg-2 col-md-3">
-                                                    <div>
-                                                        <a href="#applyNow" data-bs-toggle="modal" class="primary-link">Apply Now <i class="mdi mdi-chevron-double-right"></i></a>
-                                                    </div>
-                                                </div>
-                                                <!--end col-->
-                                            </div>
-                                            <!--end row-->
-                                        </div>
-                                    </div>
-                                    <!--end job-box-->
 
                                 </div>
+
+                                <div class="" v-else>
+                                    <!-- Skeleton Loader for Job Card -->
+                                    <div class="job-box card mt-4" style="cursor: pointer; opacity: 0.7;">
+                                        <div class="bookmark-label text-center">
+                                            <span class="bg-ss-secondary rounded-circle d-inline-block" style="width: 24px; height: 24px;"></span>
+                                        </div>
+                                        <div class="p-4">
+                                            <div class="row align-items-center">
+                                                <div class="col-md-2">
+                                                    <div class="text-center mb-4 mb-md-0">
+                                                        <span class="bg-ss-secondary rounded-3 d-inline-block" style="width: 60px; height: 60px;"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="mb-2 mb-md-0">
+                                                        <div class="bg-ss-secondary rounded mb-2" style="width: 70%; height: 20px;"></div>
+                                                        <div class="bg-ss-secondary rounded" style="width: 40%; height: 14px;"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <div class="d-flex mb-2 align-items-center">
+                                                        <span class="bg-ss-secondary rounded-circle me-2" style="width: 16px; height: 16px;"></span>
+                                                        <div class="bg-ss-secondary rounded" style="width: 40px; height: 14px;"></div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-2">
+                                                    <span class="bg-ss-secondary rounded-pill d-inline-block" style="width: 80px; height: 18px;"></span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="p-3 bg-light">
+                                            <div class="text-center ">
+                                                <div class="spinner-border text-ss-secondary" role="status">
+                                                    <span class="">...</span>
+                                                </div>
+                                            </div>
+                                            <div class="text-center ">
+                                                <div class="text-ss-secondary">
+                                                    <span class="">A processar ...</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                                 <!-- End Job-list -->
-                                <div class="row">
+                                <div class="row" v-if="jobs.length !== 0">
                                     <div class="col-lg-12 mt-4 pt-2">
                                         <nav aria-label="Page navigation example">
                                             <ul class="pagination job-pagination mb-0 justify-content-center">
@@ -931,9 +386,9 @@
                                                     </a>
                                                 </li>
                                                 <li class="page-item active"><a class="page-link" href="javascript:void(0)">1</a></li>
-                                                <li class="page-item"><a class="page-link" href="javascript:void(0)">2</a></li>
+                                                <!-- <li class="page-item"><a class="page-link" href="javascript:void(0)">2</a></li>
                                                 <li class="page-item"><a class="page-link" href="javascript:void(0)">3</a></li>
-                                                <li class="page-item"><a class="page-link" href="javascript:void(0)">4</a></li>
+                                                <li class="page-item"><a class="page-link" href="javascript:void(0)">4</a></li> -->
                                                 <li class="page-item">
                                                     <a class="page-link" href="javascript:void(0)">
                                                         <i class="mdi mdi-chevron-double-right fs-15"></i>
@@ -952,35 +407,35 @@
                         <div class="col-lg-3">
                             <div class="side-bar mt-5 mt-lg-0">
                                 <div class="accordion" id="accordionExample">
-                                    <div class="accordion-item">
+                                    <!-- <div class="accordion-item">
                                         <h2 class="accordion-header" id="locationOne">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#location" aria-expanded="true" aria-controls="location">
-                                                Location
+                                                Localização
                                             </button>
                                         </h2>
                                         <div id="location" class="accordion-collapse collapse show" aria-labelledby="locationOne">
                                             <div class="accordion-body">
                                                 <div class="side-title">
-                                                    <div class="mb-3">
+                                                    <div class="">
                                                         <form class="position-relative">
-                                                            <input class="form-control" type="search" placeholder="Search...">
+                                                            <input class="form-control" type="search" placeholder="Pesquisar...">
                                                             <button class="bg-transparent border-0 position-absolute top-50 end-0 translate-middle-y me-2" type="submit"><span class="mdi mdi-magnify text-muted"></span></button>
                                                         </form>
                                                     </div>
                                                     <div class="area-range">
-                                                        <div class="form-label mb-3">Area Range: <span class="example-val mt-2" id="slider1-span">9.00</span> miles</div>
+                                                        <div class="form-label mb-3">Raio da Área: <span class="example-val mt-2" id="slider1-span">9.00</span> milhas</div>
                                                         <div id="slider1" class="noUi-target noUi-ltr noUi-horizontal noUi-txt-dir-ltr"> 
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div><!-- end accordion-item -->
+                                    </div> --><!-- end accordion-item -->
 
-                                    <div class="accordion-item mt-4">
+                                    <div class="accordion-item ">
                                         <h2 class="accordion-header" id="experienceOne">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#experience" aria-expanded="true" aria-controls="experience">
-                                                Work experience
+                                                Experiência de trabalho
                                             </button>
                                         </h2>
                                         <div id="experience" class="accordion-collapse collapse show" aria-labelledby="experienceOne">
@@ -988,19 +443,19 @@
                                                 <div class="side-title">
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked1" />
-                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked1">No experience</label>
+                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked1">Sem experiência</label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked2" checked />
-                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked2">0-3 years</label>
+                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked2">0-3 anos</label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked3" />
-                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked3">3-6 years</label>
+                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked3">3-6 anos</label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" value="" id="flexCheckChecked4" />
-                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked4">More than 6 years</label>
+                                                        <label class="form-check-label ms-2 text-muted" for="flexCheckChecked4">Mais de 6 anos</label>
                                                     </div>
                                                 </div>
                                             </div>
@@ -1010,7 +465,7 @@
                                     <div class="accordion-item mt-3">
                                         <h2 class="accordion-header" id="jobType">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#jobtype" aria-expanded="false" aria-controls="jobtype">
-                                                Type of employment
+                                                Tipo de emprego
                                             </button>
                                         </h2>
                                         <div id="jobtype" class="accordion-collapse collapse show" aria-labelledby="jobType">
@@ -1019,25 +474,25 @@
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault6" checked>
                                                         <label class="form-check-label ms-2 text-muted" for="flexRadioDefault6">
-                                                            Freelance
+                                                            Freelancer
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault2">
                                                         <label class="form-check-label ms-2 text-muted" for="flexRadioDefault2">
-                                                            Full Time
+                                                            Tempo Integral
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault3">
                                                         <label class="form-check-label ms-2 text-muted" for="flexRadioDefault3">
-                                                            Internship
+                                                            Estágio
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="radio" name="flexRadioDefault" id="flexRadioDefault4">
                                                         <label class="form-check-label ms-2 text-muted" for="flexRadioDefault4">
-                                                            Part Time
+                                                            Meio Período
                                                         </label>
                                                     </div>
                                                 </div>
@@ -1048,7 +503,7 @@
                                     <div class="accordion-item mt-3">
                                         <h2 class="accordion-header" id="datePosted">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#dateposted" aria-expanded="false" aria-controls="dateposted">
-                                                Date Posted
+                                                Data de Publicação
                                             </button>
                                         </h2>
                                         <div id="dateposted" class="accordion-collapse collapse show" aria-labelledby="datePosted">
@@ -1057,37 +512,37 @@
                                                     <div class="form-check">
                                                         <input class="form-check-input" type="checkbox" id="checkAll" value="" />
                                                         <label class="form-check-label ms-2 text-muted" for="checkAll">
-                                                            All
+                                                            Todas
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" name="datePosted" value="last" id="flexCheckChecked5" checked />
                                                         <label class="form-check-label ms-2 text-muted" for="flexCheckChecked5">
-                                                            Last Hour
+                                                            Última hora
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" name="datePosted" value="last" id="flexCheckChecked6" />
                                                         <label class="form-check-label ms-2 text-muted" for="flexCheckChecked6">
-                                                            Last 24 hours
+                                                            Últimas 24 horas
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" name="datePosted" value="last" id="flexCheckChecked7" />
                                                         <label class="form-check-label ms-2 text-muted" for="flexCheckChecked7">
-                                                            Last 7 days
+                                                            Últimos 7 dias
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" name="datePosted" value="last" id="flexCheckChecked8" />
                                                         <label class="form-check-label ms-2 text-muted" for="flexCheckChecked8">
-                                                            Last 14 days
+                                                            Últimos 14 dias
                                                         </label>
                                                     </div>
                                                     <div class="form-check mt-2">
                                                         <input class="form-check-input" type="checkbox" name="datePosted" value="last" id="flexCheckChecked9" />
                                                         <label class="form-check-label ms-2 text-muted" for="flexCheckChecked9">
-                                                            Last 30 days
+                                                            Últimos 30 dias
                                                         </label>
                                                     </div>
                                                 </div>
@@ -1098,7 +553,7 @@
                                     <div class="accordion-item mt-3">
                                         <h2 class="accordion-header" id="tagCloud">
                                             <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#tagcloud" aria-expanded="false" aria-controls="tagcloud">
-                                                Tags Cloud
+                                                Nuvem de Tags
                                             </button>
                                         </h2>
                                         <div id="tagcloud" class="accordion-collapse collapse show" aria-labelledby="tagCloud">
@@ -1106,8 +561,8 @@
                                                 <div class="side-title">
                                                     <a href="javascript:void(0)" class="badge tag-cloud fs-13 mt-2">design</a>
                                                     <a href="javascript:void(0)" class="badge tag-cloud fs-13 mt-2">marketing</a>
-                                                    <a href="javascript:void(0)" class="badge tag-cloud fs-13 mt-2">business</a>
-                                                    <a href="javascript:void(0)" class="badge tag-cloud fs-13 mt-2">developer</a>
+                                                    <a href="javascript:void(0)" class="badge tag-cloud fs-13 mt-2">negócios</a>
+                                                    <a href="javascript:void(0)" class="badge tag-cloud fs-13 mt-2">desenvolvedor</a>
                                                 </div>
                                             </div>
                                         </div>
@@ -1134,28 +589,37 @@
                     <div class="modal-content">
                         <div class="modal-body p-5">
                             <div class="text-center mb-4">
-                                <h5 class="modal-title" id="staticBackdropLabel">Apply For This Job</h5>
+                                <h5 class="modal-title" id="staticBackdropLabel">Candidatar-se a esta vaga</h5>
                             </div>
                             <div class="position-absolute end-0 top-0 p-3">
-                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                             </div>
-                            <div class="mb-3">
-                                <label for="nameControlInput" class="form-label">Name</label>
-                                <input type="text" class="form-control" id="nameControlInput" placeholder="Enter your name">
+                            <div v-if="!isUserLogger" class="text-center">
+                                <p class="mb-4">Você precisa fazer login para se candidatar a esta vaga.</p>
+                                <a href="/sign-in.html" class="btn btn-primary w-100">Fazer Login</a>
                             </div>
-                            <div class="mb-3">
-                                <label for="emailControlInput2" class="form-label">Email Address</label>
-                                <input type="email" class="form-control" id="emailControlInput2" placeholder="Enter your email">
+                            <div v-else>
+                                <!-- <div class="mb-3">
+                                    <label for="nameControlInput" class="form-label">Nome</label>
+                                    <input type="text" class="form-control" id="nameControlInput" placeholder="Digite seu nome">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="emailControlInput2" class="form-label">E-mail</label>
+                                    <input type="email" class="form-control" id="emailControlInput2" placeholder="Digite seu e-mail">
+                                </div> -->
+                                <div class="mb-3">
+                                    <label for="messageControlTextarea" class="form-label">Observação</label>
+                                    <textarea class="form-control" autofocus id="messageControlTextarea" rows="3" placeholder="Digite a sua Observação"></textarea>
+                                </div>
+                                <!-- <div class="mb-4">
+                                    <label class="form-label" for="inputGroupFile01">Anexar Currículo</label>
+                                    <input type="file" class="form-control" id="inputGroupFile01">
+                                </div> -->
+                                <div class="alert alert-success text-center" v-if="applicationSent">
+                                    Candidatura enviada com sucesso!
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Enviar candidatura</button>
                             </div>
-                            <div class="mb-3">
-                                <label for="messageControlTextarea" class="form-label">Message</label>
-                                <textarea class="form-control" id="messageControlTextarea" rows="4" placeholder="Enter your message"></textarea>
-                            </div>
-                            <div class="mb-4">
-                                <label class="form-label" for="inputGroupFile01">Resume Upload</label>
-                                <input type="file" class="form-control" id="inputGroupFile01">
-                            </div>
-                            <button type="submit" class="btn btn-primary w-100">Send Application</button>
                         </div>
                     </div>
                 </div>
@@ -1192,6 +656,7 @@
 <script src="assets/js/pages/switcher.init.js"></script>
 
 <script src="assets/js/app.js"></script>
+
 
 </body>
 

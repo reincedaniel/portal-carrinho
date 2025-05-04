@@ -2,12 +2,46 @@
 
     <head>
         
-        @@include("partials/title-meta.html", {"title": "My Profile"})
+        @@include("partials/title-meta.html", {"title": "Meu Perfil"})
 
         <!-- Choise Css -->
         <link rel="stylesheet" href="assets/libs/choices.js/public/assets/styles/choices.min.css">
 
         @@include("partials/head-css.html")
+
+        <script>
+
+            document.addEventListener('DOMContentLoaded', function () {
+                                        
+                                
+                                window.vueApp({
+                                    data() {
+                                        return {
+                                        }
+                                    },
+                                    computed: {
+                                        isUserLogger() {
+                                            return !!localStorage.getItem('user');
+                                        },
+                                        userLogger() {
+                                            const user = localStorage.getItem('user')
+                                            return user ? JSON.parse(user) : null;
+                                        }
+                                    },
+                                    methods: {
+                                        logout() {
+                                            localStorage.clear();
+                                            window.location.reload();
+                                            window.location.href = '/sign-in.html';
+                                        }
+                                    },
+                                    mounted() {
+                                        // localStorage.setItem('user', JSON.stringify({name: 'John Doe', email: 'ma@mail.com'}));
+                                    }
+                                }).mount('#job-list-vue-app-8');
+            
+                            });
+            </script>
 
     </head>
 
@@ -18,11 +52,11 @@
 
             @@include("partials/topbar.html")
 
-            <div class="main-content">
+            <div class="main-content" id="job-list-vue-app-8">
 
                 <div class="page-content">
 
-                    @@include("partials/page-title.html",{"pagetitle":"My Profile","title":"My Profile"})
+                    @@include("partials/page-title.html",{"pagetitle":"Perfil","title":"Meu Perfil"})
 
                     <!-- START PROFILE -->
                     <section class="section">
@@ -34,8 +68,8 @@
                                             <div class="text-center pb-4 border-bottom">
                                                 <img src="assets/images/profile.jpg" alt=""
                                                     class="avatar-lg img-thumbnail rounded-circle mb-4" />
-                                                <h5 class="mb-0">Jansh Dickens</h5>
-                                                <p class="text-muted">Developer</p>
+                                                <h5 class="mb-0">{{userLogger?.email.split('@')[0]}}</h5>
+                                                <p class="text-muted">{{userLogger?.email}}</p>
                                                 <ul class="list-inline d-flex justify-content-center align-items-center ">
                                                     <li class="list-inline-item text-warning fs-19">
                                                         <i class="mdi mdi-star"></i>
@@ -66,7 +100,7 @@
                                             </div>
                                             <!--end profile-->
                                             <div class="mt-4 border-bottom pb-4">
-                                                <h5 class="fs-17 fw-bold mb-3">Documents</h5>
+                                                <h5 class="fs-17 fw-bold mb-3">Documentos</h5>
                                                 <ul class="profile-document list-unstyled mb-0">
                                                     <li>
                                                         <div class="profile-document-list d-flex align-items-center mt-4 ">
@@ -74,7 +108,7 @@
                                                                 <i class="uil uil-file"></i>
                                                             </div>
                                                             <div class="ms-3">
-                                                                <h6 class="fs-16 mb-0">Resume.pdf</h6>
+                                                                <h6 class="fs-16 mb-0">Currículo.pdf</h6>
                                                                 <p class="text-muted mb-0">1.25 MB</p>
                                                             </div>
                                                             <div class="ms-auto">
@@ -88,7 +122,7 @@
                                                                 <i class="uil uil-file"></i>
                                                             </div>
                                                             <div class="ms-3">
-                                                                <h6 class="fs-16 mb-0">Cover-letter.pdf</h6>
+                                                                <h6 class="fs-16 mb-0">Carta de apresentação.pdf</h6>
                                                                 <p class="text-muted mb-0">1.25 MB</p>
                                                             </div>
                                                             <div class="ms-auto">
@@ -100,7 +134,7 @@
                                             </div>
                                             <!--end document-->
                                             <div class="mt-4">
-                                                <h5 class="fs-17 fw-bold mb-3">Contacts</h5>
+                                                <h5 class="fs-17 fw-bold mb-3">Contatos</h5>
                                                 <div class="profile-contact">
                                                     <ul class="list-unstyled mb-0">
                                                         <li>
@@ -108,24 +142,24 @@
                                                                 <label>Email</label>
                                                                 <div>
                                                                     <p class="text-muted text-break mb-0">
-                                                                        Jansh@gmail.com
+                                                                        {{userLogger?.email}}
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                         </li>
                                                         <li>
                                                             <div class="d-flex">
-                                                                <label>Phone Number</label>
+                                                                <label>Telefone</label>
                                                                 <div>
-                                                                    <p class="text-muted mb-0">+2 345 678 0000</p>
+                                                                    <p class="text-muted mb-0">+244 945 678 0000</p>
                                                                 </div>
                                                             </div>
                                                         </li>
                                                         <li>
                                                             <div class="d-flex">
-                                                                <label>Location</label>
+                                                                <label>Localização</label>
                                                                 <div>
-                                                                    <p class="text-muted mb-0">New Caledonia</p>
+                                                                    <p class="text-muted mb-0">Luanda, Angola</p>
                                                                 </div>
                                                             </div>
                                                         </li>
@@ -147,60 +181,46 @@
                                                     <button class="nav-link active" id="overview-tab" data-bs-toggle="pill"
                                                         data-bs-target="#overview" type="button" role="tab" aria-controls="overview"
                                                         aria-selected="true">
-                                                        Overview
+                                                        Visão Geral
                                                     </button>
                                                 </li>
                                                 <li class="nav-item" role="presentation">
                                                     <button class="nav-link" id="settings-tab" data-bs-toggle="pill"
                                                         data-bs-target="#settings" type="button" role="tab" aria-controls="settings"
                                                         aria-selected="false">
-                                                        Settings
+                                                        Configurações
                                                     </button>
                                                 </li>
                                             </ul>
-                                            <!--end profile-content-nav-->
+                                        <div class="card-body p-4">
                                         <div class="card-body p-4">
                                             <div class="tab-content" id="pills-tabContent">
                                                 <div class="tab-pane fade show active" id="overview" role="tabpanel"
                                                     aria-labelledby="overview-tab">
                                                     <div>
-                                                        <h5 class="fs-18 fw-bold">About</h5>
+                                                        <h5 class="fs-18 fw-bold">Sobre</h5>
                                                         <p class="text-muted mt-4">
-                                                            Developer with over 5 years' experience working in both
-                                                            the public and private sectors. Diplomatic, personable,
-                                                            and adept at managing sensitive situations. Highly
-                                                            organized, self-motivated, and proficient with
-                                                            computers. Looking to boost students’ satisfactions
-                                                            scores for <b>International University</b>. Bachelor's
-                                                            degree in communications.
+                                                            Desenvolvedor com mais de 5 anos de experiência atuando nos setores público e privado. Diplomático, comunicativo e habilidoso em gerenciar situações sensíveis. Altamente organizado, autodidata e proficiente em informática. Busca aumentar os índices de satisfação dos alunos da <b>Universidade Internacional</b>. Bacharel em comunicação.
                                                         </p>
                                                         <p class="text-muted">
-                                                            It describes the candidate's relevant experience,
-                                                            skills, and achievements. The purpose of this career
-                                                            summary is to explain your qualifications for the job in
-                                                            3-5 sentences and convince the manager to read the whole
-                                                            resume document.
+                                                            Descreve a experiência relevante, habilidades e conquistas do candidato. O objetivo deste resumo de carreira é explicar suas qualificações para o cargo em 3-5 frases e convencer o gestor a ler todo o currículo.
                                                         </p>
                                                     </div>
                                                     <div class="candidate-education-details mt-4">
-                                                        <h6 class="fs-18 fw-bold mb-0">Education</h6>
+                                                        <h6 class="fs-18 fw-bold mb-0">Educação</h6>
                                                         <div class="candidate-education-content mt-4 d-flex">
                                                             <div class="circle flex-shrink-0 primary-bg-subtle">
                                                                 B
                                                             </div>
                                                             <div class="ms-4">
                                                                 <h6 class="fs-16 mb-1">
-                                                                    BCA - Bachelor of Computer Applications
+                                                                    BCA - Bacharel em Aplicações de Computador
                                                                 </h6>
                                                                 <p class="mb-2 text-muted">
-                                                                    International University - (2004 - 2010)
+                                                                    Universidade Internacional - (2004 - 2010)
                                                                 </p>
                                                                 <p class="text-muted">
-                                                                    There are many variations of passages of available,
-                                                                    but the majority alteration in some form. As a
-                                                                    highly skilled and successfull product development
-                                                                    and design specialist with more than 4 Years of My
-                                                                    experience.
+                                                                    Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -210,17 +230,13 @@
                                                             </div>
                                                             <div class="ms-4">
                                                                 <h6 class="fs-16 mb-1">
-                                                                    MCA - Master of Computer Application
+                                                                    MCA - Mestre em Aplicações de Computador
                                                                 </h6>
                                                                 <p class="mb-2 text-muted">
-                                                                    International University - (2010 - 2012)
+                                                                    Universidade Internacional - (2010 - 2012)
                                                                 </p>
                                                                 <p class="text-muted">
-                                                                    There are many variations of passages of available,
-                                                                    but the majority alteration in some form. As a
-                                                                    highly skilled and successfull product development
-                                                                    and design specialist with more than 4 Years of My
-                                                                    experience.
+                                                                    Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.
                                                                 </p>
                                                             </div>
                                                         </div>
@@ -229,62 +245,58 @@
                                                                 D
                                                             </div>
                                                             <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">Design Communication Visual</h6>
+                                                                <h6 class="fs-16 mb-1">Design de Comunicação Visual</h6>
                                                                 <p class="text-muted mb-2">
-                                                                    International University - (2012-2015)
+                                                                    Universidade Internacional - (2012-2015)
                                                                 </p>
                                                                 <p class="text-muted">
-                                                                    There are many variations of passages of available,
-                                                                    but the majority alteration in some form. As a
-                                                                    highly skilled and successfull product development
-                                                                    and design specialist with more than 4 Years of My
-                                                                    experience.
+                                                                    Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="candidate-education-details mt-4">
-                                                        <h6 class="fs-18 fw-bold mb-0">Experiences</h6>
+                                                        <h6 class="fs-18 fw-bold mb-0">Experiências</h6>
                                                         <div class="candidate-education-content mt-4 d-flex">
                                                             <div class="circle flex-shrink-0 primary-bg-subtle"> W </div>
                                                             <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">Web Design & Development Team Leader</h6>
-                                                                <p class="mb-2 text-muted">Creative Agency - (2013 - 2016)</p>
-                                                                <p class="text-muted">There are many variations of passages of available, but the majority alteration in some form. As a highly skilled and successfull product development and design specialist with more than 4 Years of My experience.</p>
+                                                                <h6 class="fs-16 mb-1">Líder de Equipe de Web Design & Desenvolvimento</h6>
+                                                                <p class="mb-2 text-muted">Agência Criativa - (2013 - 2016)</p>
+                                                                <p class="text-muted">Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.</p>
                                                             </div>
                                                         </div>
                                                         <div class="candidate-education-content mt-4 d-flex">
                                                             <div class="circle flex-shrink-0 primary-bg-subtle"> P </div>
                                                             <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">Project Manager</h6>
-                                                                <p class="mb-2 text-muted">Jobcy Technology Pvt.Ltd - (Pressent)</p>
-                                                                <p class="text-muted mb-0">There are many variations of passages of available, but the majority alteration in some form. As a highly skilled and successfull product development and design specialist with more than 4 Years of My experience.</p>
+                                                                <h6 class="fs-16 mb-1">Gerente de Projetos</h6>
+                                                                <p class="mb-2 text-muted">Jobcy Technology Pvt.Ltd - (Atual)</p>
+                                                                <p class="text-muted mb-0">Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.</p>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div class="mt-4">
-                                                        <h5 class="fs-18 fw-bold">Skills</h5>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2">Cloud Management</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2">Responsive Design</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2">Network Architecture</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2">PHP</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2">Bootstrap</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2">UI & UX Designer</span>
+                                                        <h5 class="fs-18 fw-bold">Habilidades</h5>
+                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Gestão em Nuvem</span>
+                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Design Responsivo</span>
+                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Arquitetura de Redes</span>
+                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">PHP</span>
+                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Bootstrap</span>
+                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">UI & UX Designer</span>
                                                     </div>
                                                     <div class="mt-4">
-                                                        <h5 class="fs-18 fw-bold">Spoken languages</h5>
-                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2">English</span>
-                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2">German</span>
-                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2">French</span>
+                                                        <h5 class="fs-18 fw-bold">Idiomas falados</h5>
+                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2 me-2">Inglês</span>
+                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2 me-2">Alemão</span>
+                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2 me-2">Francês</span>
                                                     </div>
                                                 </div>
                                                 <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
                                                     <form action="#">
                                                         <div>
-                                                            <h5 class="fs-17 fw-semibold mb-3 mb-0">My Account</h5>
+                                                            <h5 class="fs-17 fw-semibold mb-3 mb-0">Minha Conta</h5>
                                                             <div class="text-center">
                                                                 <div class="mb-4 profile-user">
-                                                                    <img src="assets/images/user/img-02.jpg" class="rounded-circle img-thumbnail profile-img" id="profile-img" alt="">
+                                                                    <img src="assets/images/profile.jpg" class="rounded-circle img-thumbnail profile-img" id="profile-img" alt="">
                                                                     <div class="p-0 rounded-circle profile-photo-edit">
                                                                         <input id="profile-img-file-input" type="file" class="profile-img-file-input">
                                                                         <label for="profile-img-file-input" class="profile-photo-edit avatar-xs">
@@ -296,31 +308,31 @@
                                                             <div class="row">
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
-                                                                        <label for="firstName" class="form-label">First Name</label>
+                                                                        <label for="firstName" class="form-label">Nome</label>
                                                                         <input type="text" class="form-control" id="firstName"
-                                                                            value="Jansh" />
+                                                                            :value="userLogger?.email.split('@')[0]" />
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
-                                                                        <label for="lastName" class="form-label">Last Name</label>
+                                                                        <label for="lastName" class="form-label">Sobrenome</label>
                                                                         <input type="text" class="form-control" id="lastName"
-                                                                            value="Dickens" />
+                                                                            :value="userLogger?.email.split('@')[0]" />
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
-                                                                        <label for="choices-single-categories" class="form-label">Account Type</label>
+                                                                        <label for="choices-single-categories" class="form-label">Tipo de Conta</label>
                                                                         <select class="form-select" data-trigger
                                                                             name="choices-single-categories"
                                                                             id="choices-single-categories"
                                                                             aria-label="Default select example">
-                                                                            <option value="4">Accounting</option>
-                                                                            <option value="1">IT & Software</option>
+                                                                            <option value="4">Contabilidade</option>
+                                                                            <option value="1">TI & Software</option>
                                                                             <option value="3">Marketing</option>
-                                                                            <option value="5">Banking</option>
+                                                                            <option value="5">Bancário</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
@@ -329,7 +341,7 @@
                                                                     <div class="mb-3">
                                                                         <label for="email" class="form-label">Email</label>
                                                                         <input type="text" class="form-control" id="email"
-                                                                            value="Jansh@gmail.com" />
+                                                                            :value="userLogger?.email" />
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
@@ -338,44 +350,42 @@
                                                         </div>
                                                         <!--end account-->
                                                         <div class="mt-4">
-                                                            <h5 class="fs-17 fw-semibold mb-3">Profile</h5>
+                                                            <h5 class="fs-17 fw-semibold mb-3">Perfil</h5>
                                                             <div class="row">
                                                                 <div class="col-lg-12">
                                                                     <div class="mb-3">
                                                                         <label for="exampleFormControlTextarea1"
-                                                                            class="form-label">Introduce Yourself</label>
+                                                                            class="form-label">Apresente-se</label>
                                                                         <textarea class="form-control" id="exampleFormControlTextarea1"
-                                                                            rows="5">Developer with over 5 years' experience working in both the public and private sectors. Diplomatic, personable, and adept at managing sensitive situations. Highly organized, self-motivated, and proficient with computers. Looking to boost students’ satisfactions scores for International University. Bachelor's degree in communications.</textarea>
+                                                                            rows="5">Desenvolvedor com mais de 5 anos de experiência atuando nos setores público e privado. Diplomático, comunicativo e habilidoso em gerenciar situações sensíveis. Altamente organizado, autodidata e proficiente em informática. Busca aumentar os índices de satisfação dos alunos da Universidade Internacional. Bacharel em comunicação.</textarea>
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
-                                                                        <label for="languages" class="form-label">Languages</label>
+                                                                        <label for="languages" class="form-label">Idiomas</label>
                                                                         <input type="text" class="form-control" id="languages"
-                                                                            value="English, German, French" />
+                                                                            value="Inglês, Alemão, Francês" />
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
-                                                                        <label for="choices-single-location" class="form-label">Location</label>
+                                                                        <label for="choices-single-location" class="form-label">Localização</label>
                                                                         <select class="form-select" data-trigger
                                                                             name="choices-single-location" id="choices-single-location"
-                                                                            aria-label="Default select exam
-                                                                            ple">
+                                                                            aria-label="Default select example">
                                                                             <option value="ME">Montenegro</option>
                                                                             <option value="MS">Montserrat</option>
-                                                                            <option value="MA">Morocco</option>
-                                                                            <option value="MZ">Mozambique</option>
+                                                                            <option value="MA">Marrocos</option>
+                                                                            <option value="MZ">Moçambique</option>
                                                                         </select>
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
                                                                 <div class="col-lg-12">
                                                                     <div class="mb-3">
-                                                                        <label for="attachmentscv" class="form-label">Attachments
-                                                                            CV</label>
+                                                                        <label for="attachmentscv" class="form-label">Anexar CV</label>
                                                                         <input class="form-control" type="file" id="attachmentscv" />
                                                                     </div>
                                                                 </div>
@@ -385,7 +395,7 @@
                                                         </div>
                                                         <!--end profile-->
                                                         <div class="mt-4">
-                                                            <h5 class="fs-17 fw-semibold mb-3">Social Media</h5>
+                                                            <h5 class="fs-17 fw-semibold mb-3">Redes Sociais</h5>
                                                             <div class="row">
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
@@ -425,34 +435,32 @@
                                                         <!--end socia-media-->
                                                         <div class="mt-4">
                                                             <h5 class="fs-17 fw-semibold mb-3 mb-3">
-                                                                Change Password
+                                                                Alterar Senha
                                                             </h5>
                                                             <div class="row">
                                                                 <div class="col-lg-12">
                                                                     <div class="mb-3">
-                                                                        <label for="current-password-input" class="form-label">Current
-                                                                            password</label>
+                                                                        <label for="current-password-input" class="form-label">Senha Atual</label>
                                                                         <input type="password" class="form-control"
-                                                                            placeholder="Enter Current password"
+                                                                            placeholder="Digite a senha atual"
                                                                             id="current-password-input" />
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
-                                                                        <label for="new-password-input" class="form-label">New
-                                                                            password</label>
+                                                                        <label for="new-password-input" class="form-label">Nova Senha</label>
                                                                         <input type="password" class="form-control"
-                                                                            placeholder="Enter new password"
+                                                                            placeholder="Digite a nova senha"
                                                                             id="new-password-input" />
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->
                                                                 <div class="col-lg-6">
                                                                     <div class="mb-3">
-                                                                        <label for="confirm-password-input" class="form-label">Confirm Password</label>
+                                                                        <label for="confirm-password-input" class="form-label">Confirmar Senha</label>
                                                                         <input type="password" class="form-control"
-                                                                            placeholder="Confirm Password"
+                                                                            placeholder="Confirme a nova senha"
                                                                             id="confirm-password-input" />
                                                                     </div>
                                                                 </div>
@@ -462,7 +470,7 @@
                                                                         <input class="form-check-input" type="checkbox" value=""
                                                                             id="verification" />
                                                                         <label class="form-check-label" for="verification">
-                                                                            Enable Two-Step Verification via email
+                                                                            Ativar verificação em duas etapas por email
                                                                         </label>
                                                                     </div>
                                                                 </div>
@@ -472,7 +480,7 @@
                                                         </div>
                                                         <!--end Change-password-->
                                                         <div class="mt-4 text-end">
-                                                            <a href="javascript:void(0)" class="btn btn-primary">Update</a>
+                                                            <a href="javascript:void(0)" class="btn btn-primary">Atualizar</a>
                                                         </div>
                                                     </form>
                                                     <!--end form-->

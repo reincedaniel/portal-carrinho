@@ -1,106 +1,269 @@
 @@include("partials/main.html")
 
-    <head>
-        
-        @@include("partials/title-meta.html", {"title": "Sign Up"})
+<head>
+    @@include("partials/title-meta.html", {"title": "Sign Up"})
+    @@include("partials/head-css.html")
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            window.vueApp({
+                data() {
+                    return {
+                        payload: {
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            confirmPassword: '',
+                            phoneNumber: '',
+                            roles: ["Candidate"]
+                            
+                        },
+                        loading: false,
+                        showPassword: false,
+                        errors: {
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            confirmPassword: ''
+                        },
+                        notification: {
+                            message: '',
+                            type: ''
+                        }
+                    }
+                },
+                methods: {
+                    validateEmail(email) {
+                        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        return re.test(email);
+                    },
+                    validateForm() {
+                        let valid = true;
+                        this.errors = {
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            confirmPassword: ''
+                        };
 
-        @@include("partials/head-css.html")
+                        if (!this.payload.firstName) {
+                            this.errors.firstName = 'O nome é obrigatório.';
+                            valid = false;
+                        }
+                        if (!this.payload.lastName) {
+                            this.errors.lastName = 'O sobrenome é obrigatório.';
+                            valid = false;
+                        }
+                        if (!this.payload.email) {
+                            this.errors.email = 'O e-mail é obrigatório.';
+                            valid = false;
+                        } else if (!this.validateEmail(this.payload.email)) {
+                            this.errors.email = 'E-mail inválido.';
+                            valid = false;
+                        }
+                        if (!this.payload.password) {
+                            this.errors.password = 'A palavra-passe é obrigatória.';
+                            valid = false;
+                        } else if (this.payload.password.length < 6) {
+                            this.errors.password = 'A palavra-passe deve ter pelo menos 6 caracteres.';
+                            valid = false;
+                        } else if (!/[!@#$%^&*(),.?":{}|<>_\-\\[\];'/+=~`]/.test(this.payload.password)) {
+                            this.errors.password = 'A palavra-passe deve conter pelo menos um caractere especial.';
+                            valid = false;
+                        } else if (!/[a-z]/.test(this.payload.password)) {
+                            this.errors.password = 'A palavra-passe deve conter pelo menos uma letra minúscula.';
+                            valid = false;
+                        } else if (!/[A-Z]/.test(this.payload.password)) {
+                            this.errors.password = 'A palavra-passe deve conter pelo menos uma letra maiúscula.';
+                            valid = false;
+                        }
+                        if (!this.payload.confirmPassword) {
+                            this.errors.confirmPassword = 'Confirme sua palavra-passe.';
+                            valid = false;
+                        } else if (this.payload.password !== this.payload.confirmPassword) {
+                            this.errors.confirmPassword = 'As palavras-passe não coincidem.';
+                            valid = false;
+                        }
+                        return valid;
+                    },
+                    showNotification(message, type = 'error') {
+                        this.notification.message = message;
+                        this.notification.type = type;
+                        setTimeout(() => {
+                            this.notification.message = '';
+                        }, 4000);
+                    },
+                    async submitPayload(e) {
+                        if (e) e.preventDefault();
+                        if (!this.validateForm()) {
+                            this.showNotification('Por favor, corrija os erros no formulário.', 'error');
+                            return;
+                        }
+                        this.loading = true;
+                        try {
+                            const url = "https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/auth/register";
+                            const response = await fetch(url, {
+                                method: "POST",
+                                headers: {
+                                    "Content-Type": "application/json"
+                                },
+                                body: JSON.stringify(this.payload/* {
+                                    firstName: this.payload.firstName,
+                                    lastName: this.payload.lastName,
+                                    email: this.payload.email,
+                                    password: this.payload.password
+                                } */)
+                            });
+                            const data = await response.json();
+                            if (response.status !== 200 || !data.succeeded) {
+                                this.showNotification(data.message || "Erro ao cadastrar.", 'error');
+                                this.loading = false;
+                                return;
+                            }
+                            localStorage.setItem("user", JSON.stringify(data.data));
+                            localStorage.setItem("token", data.data?.token);
+                            this.showNotification("Cadastro realizado com sucesso!", 'success');
+                            this.payload = {
+                            firstName: '',
+                            lastName: '',
+                            email: '',
+                            password: '',
+                            confirmPassword: '',
+                            phoneNumber: '',
+                            roles: ["Candidate"]
+                            
+                        }
+                            setTimeout(() => {
+                                window.location.href = "index.html";
+                            }, 500);
+                        } catch (err) {
+                            this.showNotification("Erro ao conectar ao servidor.", 'error');
+                        } finally {
+                            this.loading = false;
+                        }
+                    }
+                }
+            }).mount('#job-list-vue-app-signup');
+        });
+    </script>
+</head>
 
-    </head>
+@@include("partials/body.html")
 
-    @@include("partials/body.html")
-
-        <!-- Begin page -->
-        <div>
-
-            
-            <div class="main-content">
-
-                <div class="page-content">
-
-                    <!-- START SIGN-UP -->
-                    <section class="bg-auth">
-                        <div class="container">
-                            <div class="row justify-content-center">
-                                <div class="col-xl-10 col-lg-12">
-                                    <div class="card auth-box">
-                                        <div class="row align-items-center">
-                                            <div class="col-lg-6 text-center">
-                                                <div class="card-body p-4">
-                                                    <a href="index.html">
-                                                        <img src="assets/images/logo.svg" alt="" class="logo-light">
-                                                         <img src="assets/images/logo_white.svg" alt="" class="logo-dark">
-                                                    </a>
-                                                       <!-- <div class="mt-5 "></div> -->
-                                                       <img src="assets/images/auth/sign-up.png" alt="" class="img-fluid d-none d-lg-block mt-5 ">
+<!-- Begin page -->
+<div>
+    <div class="main-content" id="job-list-vue-app-signup">
+        <div class="page-content">
+            <!-- START SIGN-UP -->
+            <section class="bg-auth">
+                <div class="container">
+                    <div class="row justify-content-center">
+                        <div class="col-xl-10 col-lg-12">
+                            <div class="card auth-box">
+                                <div class="row align-items-center">
+                                    <div class="col-lg-6 text-center">
+                                        <div class="card-body p-4">
+                                            <a href="index.html">
+                                                <img src="assets/images/logo.svg" alt="" class="logo-light">
+                                                <img src="assets/images/logo_white.svg" alt="" class="logo-dark">
+                                            </a>
+                                            <img src="assets/images/auth/sign-up.png" alt="" class="img-fluid d-none d-lg-block mt-5 ">
+                                        </div>
+                                    </div><!--end col-->
+                                    <div class="col-lg-6">
+                                        <div class="auth-content card-body p-5 text-white">
+                                            <div class="w-100">
+                                                <div class="text-center mb-4">
+                                                    <h5>Criar Uma Conta</h5>
+                                                    <p class="text-white-70">Cadastre-se e tenha acesso a todos os recursos do Portal</p>
                                                 </div>
-                                            </div><!--end col-->
-                                            <div class="col-lg-6">
-                                                <div class="auth-content card-body p-5 text-white">
-                                                    <div class="w-100">
-                                                        <div class="text-center">
-                                                            <h5>Vamos começar</h5>
-                                                            <p class="text-white-70">Cadastre-se e tenha acesso a todos os recursos do Portal</p>
-                                                        </div>
-                                                        <form action="index.html" class="auth-form">
-                                                            <div class="mb-3">
-                                                                <label for="usernameInput" class="form-label">Nome</label>
-                                                                <input type="text" class="form-control" required id="usernameInput" placeholder="Digite seu nome de usuário">
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="usernameInput" class="form-label">Sobrenome</label>
-                                                                <input type="text" class="form-control" required id="usernameInput" placeholder="Digite seu nome de usuário">
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="passwordInput" class="form-label">E-mail</label>
-                                                                <input type="email" class="form-control" required id="emailInput" placeholder="Digite seu e-mail">
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="emailInput" class="form-label">Palavra-Passe</label>
-                                                                <input type="password" class="form-control" required id="passwordInput" placeholder="Digite sua palavra-passe">
-                                                            </div>
-                                                            <div class="mb-3">
-                                                                <label for="emailInput2" class="form-label">Confirmar Palavra-Passe</label>
-                                                                <input type="password" class="form-control" required id="passwordInput2" placeholder="Digite sua palavra-passe">
-                                                            </div>
-                                                            <div class="mb-4">
-                                                                <div class="form-check"><input class="form-check-input" type="checkbox" id="flexCheckDefault">
-                                                                    <label class="form-check-label" for="flexCheckDefault">Eu concordo com os <a href="javascript:void(0)" class="text-white text-decoration-underline">Termos e condições</a></label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="text-center">
-                                                                <button type="submit" class="btn btn-white btn-hover w-100">Cadastrar</button>
-                                                            </div>
-                                                        </form>
-                                                        <div class="mt-3 text-center">
-                                                            <p class="mb-0">Já é membro? <a href="sign-in.html" class="fw-medium text-white text-decoration-underline"> Entrar </a></p>
+                                                <!-- Notification -->
+                                                <div v-if="notification.message" :class="['alert', notification.type === 'success' ? 'alert-success' : 'alert-danger']" role="alert">
+                                                    {{ notification.message }}
+                                                </div>
+                                                <form @submit="submitPayload" class="auth-form" novalidate>
+                                                    <div class="mb-3">
+                                                        <label for="firstNameInput" class="form-label">Nome</label>
+                                                        <input type="text" class="form-control" id="firstNameInput" placeholder="Digite seu nome" v-model="payload.firstName" :class="{'is-invalid': errors.firstName}" required>
+                                                        <!-- <div class="invalid-feedback text-warning" v-if="errors.firstName">{{ errors.firstName }}</div> -->
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="lastNameInput" class="form-label">Sobrenome</label>
+                                                        <input type="text" class="form-control" id="lastNameInput" placeholder="Digite seu sobrenome" v-model="payload.lastName" :class="{'is-invalid': errors.lastName}" required>
+                                                        <!-- <div class="invalid-feedback text-warning" v-if="errors.lastName">{{ errors.lastName }}</div> -->
+                                                    </div>
+                                                    <div class="mb-3">
+                                                        <label for="emailInput" class="form-label">E-mail</label>
+                                                        <input type="email" class="form-control" id="emailInput" placeholder="Digite seu e-mail" v-model="payload.email" :class="{'is-invalid': errors.email}" required>
+                                                        <!-- <div class="invalid-feedback text-warning" v-if="errors.email">{{ errors.email }}</div> -->
+                                                    </div>
+                                                    <div class="mb-3">
+                                                      
+                                                        <label for="passwordInput" class="form-label" >Palavra-Passe</label>
+                                                        <div class="input-group">
+                                                        <input :type="showPassword ? 'text' : 'password'" class="form-control" id="passwordInput" placeholder="Digite sua palavra-passe" v-model="payload.password" :class="{'is-invalid': errors.password}" autocomplete="current-password" required>
+                                                                <button type="button" class="btn btn-primary" @click="showPassword = !showPassword" tabindex="-1">
+                                                                    <i v-if="showPassword" class="mdi mdi-eye"></i>
+                                                                    <i v-else class="mdi mdi-eye-off"></i>
+                                                                </button>  <div class="invalid-feedback text-warning" v-if="errors.password">{{ errors.password }}</div> </div>
+                                                      
+                                                        
+                                                        
+                                                    </div>
+                                                    <div class="mb-3">
+
+                                                        
+                                                        <label for="confirmPasswordInput" class="form-label">Confirmar Palavra-Passe</label>
+
+                                                        <div class="input-group">
+                                                            <input :type="showPassword ? 'text' : 'password'" class="form-control" id="confirmPasswordInput" placeholder="Confirme sua palavra-passe" v-model="payload.confirmPassword" :class="{'is-invalid': errors.confirmPassword}" required>
+                                                                    <button type="button" class="btn btn-primary" @click="showPassword = !showPassword" tabindex="-1">
+                                                                        <i v-if="showPassword" class="mdi mdi-eye"></i>
+                                                                        <i v-else class="mdi mdi-eye-off"></i>
+                                                                    </button>   <div class="invalid-feedback text-warning" v-if="errors.confirmPassword">{{ errors.confirmPassword }}</div> </div>
+                                                          
+                                                            
+                                                            
+<!--  -->
+
+                                                    </div>
+                                                    <div class="mb-4">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="checkbox" id="flexCheckDefault" required>
+                                                            <label class="form-check-label" for="flexCheckDefault">Eu concordo com os <a href="javascript:void(0)" class="text-white text-decoration-underline">Termos e condições</a></label>
                                                         </div>
                                                     </div>
+                                                    <div class="text-center">
+                                                        <button type="submit" class="btn btn-white btn-hover w-100" :disabled="loading">
+                                                            <span v-if="loading" class="spinner-border spinner-border-sm me-2"></span>
+                                                            Cadastrar
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                                <div class="mt-3 text-center">
+                                                    <p class="mb-0">Já é membro? <a href="sign-in.html" class="fw-medium text-white text-decoration-underline"> Entrar </a></p>
                                                 </div>
-                                            </div><!--end col-->
-                                        </div><!--end row-->
-                                    </div><!--end auth-box-->
-                                </div><!--end col-->
-                            </div><!--end row-->
-                        </div><!--end container-->
-                    </section>
-                    <!-- END SIGN-UP -->
-                    
-                </div>
-                <!-- End Page-content -->
-
-            </div>
-            <!-- end main content-->
-
+                                            </div>
+                                        </div>
+                                    </div><!--end col-->
+                                </div><!--end row-->
+                            </div><!--end auth-box-->
+                        </div><!--end col-->
+                    </div><!--end row-->
+                </div><!--end container-->
+            </section>
+            <!-- END SIGN-UP -->
         </div>
-        <!-- END layout-wrapper -->
+        <!-- End Page-content -->
+    </div>
+    <!-- end main content-->
+</div>
+<!-- END layout-wrapper -->
 
-        @@include("partials/switcher.html")
-
-        @@include("partials/vendor-scripts.html")
-
-        <!-- Switcher Js -->
-        <script src="assets/js/pages/switcher.init.js"></script>
-
-    </body>
+@@include("partials/switcher.html")
+@@include("partials/vendor-scripts.html")
+<script src="assets/js/pages/switcher.init.js"></script>
+</body>
 </html>

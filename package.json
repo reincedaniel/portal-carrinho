@@ -5,7 +5,7 @@
   "description": "",
   "main": "gulpfile.js",
   "build": "gulp",
-  "author": "Themesdesign",
+  "author": "Lourenço Daniel Sabastião Carlos",
   "browserslist": [
     "last 2 version",
     "> 2%"
