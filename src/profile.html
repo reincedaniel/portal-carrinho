@@ -26,6 +26,7 @@
                                             loadingPicture: false,
                                             phone1:{number:'', type:'whatsapp'},
                                             phone2:{number:'', type:'normal'},
+                                            email1:''
 
                                         }
                                     },
@@ -110,6 +111,7 @@
                                                 { field: this.candidateActive.gender, label: 'Gênero' },
                                                 { field: this.candidateActive.civilStatus, label: 'Estado Civil' },
                                                 { field: this.candidateActive.location, label: 'Endereço' },
+                                                { field: this.email1, label: 'E-mail' },
                                                 { field: this.phone1.number, label: 'Telefone (Whatsapp)' },
                                             ];
                                             const missing = requiredFields.filter(f => !f.field || !f.field.toString().trim());
@@ -118,7 +120,11 @@
                                                 return;
                                             }
 
-                                                this.successMessage = 'Perfil Actualizado com sucesso!';
+                                                this.successMessage = 'Perfil Actualizado com sucesso! ...';
+
+                                               /*  setInterval(() => {
+                                                    window.location.reload();
+                                                }, 1200); */
                                             } else {
                                           
                                             this.successMessage = '';
@@ -131,6 +137,7 @@
                                                 { field: this.candidateActive.gender, label: 'Gênero' },
                                                 { field: this.candidateActive.civilStatus, label: 'Estado Civil' },
                                                 { field: this.candidateActive.location, label: 'Endereço' },
+                                                { field: this.email1, label: 'E-mail' },
                                                 { field: this.phone1.number, label: 'Telefone (Whatsapp)' },
                                             ];
                                             const missing = requiredFields.filter(f => !f.field || !f.field.toString().trim());
@@ -143,6 +150,8 @@
                                          
 
                                             this.candidateActive.phoneNumbers = []
+                                            this.candidateActive.emails = []
+                                            this.candidateActive.emails.push(this.email1)
 
                                             if(this.phone1.number) {
                                                 this.candidateActive.phoneNumbers.push({ number: this.phone1.number, type: 'whatsapp' });
@@ -169,7 +178,10 @@
                                                     this.candidateActive = { ...this.candidateActive, ...data.data };
                                                     // localStorage.setItem('candidate', JSON.stringify(this.candidateActive));
                                                     this.getCandidate()
-                                                    this.successMessage = 'Perfil salvo com sucesso!';
+                                                    this.successMessage = 'Perfil salvo com sucesso! ...';
+                                                    setInterval(() => {
+                                                    window.location.reload();
+                                                }, 1200);
                                                 } else {
                                                     this.errorMessage = data?.message || 'Erro ao salvar perfil.';
                                                 }
@@ -203,6 +215,8 @@
                                                 const data = await response.json();
                                                 // Atualiza os dados do candidato com os dados extraídos, se disponíveis
                                                 if (data && data.data) {
+
+                                                    
                                                     const phoneNumbers = data.data.phoneNumbers || [];
                                                     if (phoneNumbers.length > 0) {
                                                         this.phone1 = { number: phoneNumbers[0].number || '', type: phoneNumbers[0].type || 'whatsapp' };
@@ -216,8 +230,15 @@
                                                         this.phone2 = { number: '', type: 'normal' };
                                                     }
                                                    
+                                                    const mails =  data.data.emails || [];
+                                                    if (mails.length > 0) {
+                                                        this.email1 = mails[0] || '';
+                                                    } else {
+                                                        this.email1 = '';
+                                                    }
                                                     
                                                     this.candidateActive = { ...this.candidateActive, ...data.data , userId: this.userLogger.userId };
+                                                   
                                                 }
                                             } catch (e) {
                                                 // erro silencioso
@@ -233,7 +254,6 @@
                                             try {
                                                 const res = await fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
                                                 const data = await res.json();
-                                                console.log("getCandidate");
                                                 const candidate = data?.data?.data || [];
                                                 if (!candidate.length) return;
                                                 localStorage.setItem("candidate", JSON.stringify(candidate[0]));
@@ -265,6 +285,16 @@
                                                         this.phone1 = { number: '', type: 'whatsapp' };
                                                         this.phone2 = { number: '', type: 'normal' };
                                                     }
+
+                                                    /*  */
+
+                                                    const mails = this.candidateActive.emails || [];
+                                                    if (mails.length > 0) {
+                                                        this.email1 = mails[0] || '';
+                                                    } else {
+                                                        this.email1 = '';
+                                                    }
+                                                    
                                         },
                                         async getCandidate() {
                                             this.loading = true;
@@ -273,7 +303,6 @@
                                             try {
                                                 const res = await fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
                                                 const data = await res.json();
-                                                console.log("getCandidate");
                                                 const candidate = data?.data?.data || [];
                                                 if (!candidate.length) return;
                                                 localStorage.setItem("candidate", JSON.stringify(candidate[0]));
@@ -302,7 +331,6 @@
                                                 fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
                                                     .then(res => res.json())
                                                     .then(data => {
-                                                        console.log("getCandidateCheckStatus");
                                                         const candidateStatus = data?.data || null;
                                                         localStorage.setItem("candidateStatusCheck", JSON.stringify(candidateStatus));
                                                         resolve();
@@ -743,6 +771,13 @@
                                                                     <label for="location" class="form-label">Endereço</label>
                                                                     <input type="text" class="form-control" id="location"
                                                                         v-model="candidateActive.location" />
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-lg-6">
+                                                                <div class="mb-3">
+                                                                    <label for="email" class="form-label">E-mail</label>
+                                                                    <input type="text" required class="form-control" id="email"
+                                                                        v-model="email1" placeholder="ex.: exemplo@mail.com" />
                                                                 </div>
                                                             </div>
                                                             <div class="col-lg-6">
