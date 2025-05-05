@@ -652,7 +652,7 @@
 
                                                             <h5 class="fs-17 fw-semibold mb-3 mb-0">Minha Conta</h5>
                                                             
-                                                            <div class="text-center" v-if="!( !userCandidateCheckStatus || !(userCandidateCheckStatus && userCandidateCheckStatus.isComplete))" >
+                                                            <div class="text-center" v-if="candidateActive.id" >
                                                                 <div class="mb-4 profile-user">
                                                                     <img :src="candidateActive?.photoUrl || 'assets/images/profile.jpg'" class="rounded-circle img-thumbnail profile-img" id="profile-img" alt="">
                                                                     <div class="p-0 rounded-circle profile-photo-edit">
