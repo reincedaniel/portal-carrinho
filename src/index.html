@@ -178,7 +178,7 @@
                            
                             <div class="row align-items-center">
                           
-                                <div v-if="isUserLogger && ( !userCandidateCheckStatus || !(userCandidateCheckStatus && userCandidateCheckStatus.isComplete))" class="alert alert-warning text-center mb-0 mb-5" style="position:relative; z-index:1050;">
+                                <div v-if="isUserLogger && ( !userCandidateCheckStatus || !(userCandidateCheckStatus && userCandidateCheckStatus.isComplete))" class="alert alert-warning text-center mb-0 mb-5" style="position:relative; ">
                                     <strong>Atenção:</strong> Você precisa concluir o seu perfil de candidato para acessar todas as funcionalidades. <a href="/profile.html" class="alert-link">Clique aqui para completar seu perfil.</a>
                                 </div>
                                 <div class="col-lg-7">
@@ -870,6 +870,11 @@
                                             <label for="messageControlTextarea" class="form-label">Observação</label>
                                             <textarea class="form-control" autofocus id="messageControlTextarea" rows="3" placeholder="Digite a sua Observação" v-model="applicationNote"></textarea>
                                         </div> -->
+
+                                        <div v-if="isUserLogger && ( !userCandidateCheckStatus || !(userCandidateCheckStatus && userCandidateCheckStatus.isComplete))" class="alert alert-warning text-center mb-3">
+                                            Seu perfil de candidato está incompleto. <a href="/profile.html" class="alert-link">Clique aqui para atualizar seu perfil.</a>
+                                        </div>
+                                        <div class="" v-else>
                                         <div class="alert alert-success text-center" v-if="applicationSent">
                                             Candidatura enviada com sucesso!
                                         </div>
@@ -879,7 +884,7 @@
                                         <button v-if="!applicationSent" type="button" class="btn btn-primary w-100" :disabled="applicationLoading"  @click="sendApplication()"  >
                                             <span v-if="applicationLoading" class="spinner-border spinner-border-sm me-2"></span>
                                             Enviar candidatura
-                                        </button>
+                                        </button></div>
                                 
                                     </div>
                                 </div>
@@ -917,7 +922,7 @@
         
         <!-- App Js -->
         <script src="assets/js/app.js"></script>
-    <style>
+    <style scoped>
     .mailchimp-avatar {
         width: 90px;
         height: 90px;
