@@ -20,28 +20,17 @@
                 window.vueApp({
             data() {
                 return {
-                    icons: [
-'mdi-layers',
-'mdi-airplay',
-'mdi-shopping',
-'mdi-doctor',
-'mdi-hospital-building',
-'mdi-telegram',
-'mdi-image',
-'mdi-android',
-'mdi-briefcase',
-'mdi-school',
-'mdi-chart-pie',
-'mdi-currency-usd',
-'mdi-cloud',
-'mdi-presentation-play',
-'mdi-rocket-launch'
-],
+
                     jobs: [],
                     loading: true,
                     jobsRaw:null,
                     selectedLocal:null,
                     jobCategories: [],
+                    applicationNote: '',
+                    applicationSent: false,
+                    applicationLoading: false,
+                    applicationError: '',
+                    applicationJobId: null,
                 }
             },
             computed: {
@@ -63,30 +52,60 @@
                 userLogger() {
                     const user = localStorage.getItem('user')
                     return user ? JSON.parse('user') : null;
-                }         
+                }  ,   userCandidate() {
+                                const candidate = localStorage.getItem('candidate')
+                                return candidate ? JSON.parse(candidate) : null;
+                            },
+                            userCandidateCheckStatus() {
+                                const candidateStatusCheck = localStorage.getItem('candidateStatusCheck')
+                                return candidateStatusCheck ? JSON.parse(candidateStatusCheck) : null;
+                            }       
             },
             methods: {
-                randomCategoryIcon(idx) {
-                // Lista de ícones possíveis (pode adicionar mais)
-                const icons = [
-                    'uim uim-layers-alt',
-                    'uim uim-airplay',
-                    'uim uim-bag',
-                    'uim uim-user-md',
-                    'uim uim-hospital',
-                    'uim uim-telegram-alt',
-                    'uim uim-scenery',
-                    'uim uim-android-alt',
-                    'uim uim-briefcase',
-                    'uim uim-graduation-cap',
-                    'uim uim-chart-pie',
-                    'uim uim-money-bill',
-                    'uim uim-cloud',
-                    'uim uim-presentation-play',
-                    'uim uim-rocket'
-                ];
-                return icons[idx % icons.length];
-            },
+                openApplyModal(jobId) {
+                    this.applicationJobId = jobId;
+                    this.applicationNote = '';
+                    this.applicationSent = false;
+                    this.applicationError = '';
+                    this.applicationLoading = false;
+                    var modal = new bootstrap.Modal(document.getElementById('applyNow'));
+                    modal.show();
+                },
+                async sendApplication() {
+                    
+                    if (!this.isUserLogger) return;
+                    this.applicationLoading = true;
+                    this.applicationError = '';
+                    this.applicationSent = false;
+                    try {
+                        const candidate = this.userCandidate;
+                        const jobId = this.applicationJobId;
+                        if (!candidate || !candidate.id || !jobId) {
+                            this.applicationError = 'Dados do candidato ou vaga não encontrados.';
+                            this.applicationLoading = false;
+                            return;
+                        }
+                        const res = await fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                candidateId: candidate.id,
+                                jobId: jobId,
+                                note: this.applicationNote
+                            })
+                        });
+                        if (!res.ok) {
+                            const err = await res.json().catch(() => ({}));
+                            this.applicationError = (err?.message==="Job application are exist"?"Já se candidatou nesta vaga!":err?.message) || 'Erro ao enviar candidatura.';
+                            this.applicationLoading = false;
+                            return;
+                        }
+                        this.applicationSent = true;
+                    } catch (e) {
+                        this.applicationError = 'Erro ao enviar candidatura.';
+                    }
+                    this.applicationLoading = false;
+                },
                 formatDate(dateString) {
                     if (!dateString) return '';
                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
@@ -115,7 +134,20 @@
                 .finally(() => {
                     this.loading = false;
                 });
-                }
+                },
+            
+                getCandidateCheckStatus() {
+                                if (!this.userLogger) return;
+                                const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
+                                if (!candidate || !candidate.id) return;
+                                return fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const candidate = data?.data || null;
+                                        localStorage.setItem("candidateStatusCheck", JSON.stringify(candidate));
+                                    })
+                                    .catch(() => null);
+                            },
             },
             mounted() {
                 this.getJobs();
@@ -139,11 +171,16 @@
             <div class="main-content"  id="job-list-vue-app">
 
                 <div class="page-content">
-
+                
                     <!-- START HOME -->
                     <section class="bg-home2" id="home">
                         <div class="container">
+                           
                             <div class="row align-items-center">
+                          
+                                <div v-if="isUserLogger && ( !userCandidateCheckStatus || !(userCandidateCheckStatus && userCandidateCheckStatus.isComplete))" class="alert alert-warning text-center mb-0 mb-5" style="position:relative; z-index:1050;">
+                                    <strong>Atenção:</strong> Você precisa concluir o seu perfil de candidato para acessar todas as funcionalidades. <a href="/profile.html" class="alert-link">Clique aqui para completar seu perfil.</a>
+                                </div>
                                 <div class="col-lg-7">
                                     <div class="mb-4 pb-3 me-lg-5">
                                         <h6 class="sub-title">Temos mais de 1.000 vagas disponíveis</h6>
@@ -309,7 +346,7 @@
                                                                     </div>
                                                                     <div class="col-lg-2 col-md-3">
                                                                         <div class="text-start text-md-end">
-                                                                            <a href="#applyNow" data-bs-toggle="modal" class="primary-link fw-bold text-primary" style="font-weight: bold; color: #00a5bb !important;">
+                                                                            <a href="javascript:void(0)" @click="openApplyModal(job.id)" class="primary-link fw-bold text-primary" style="font-weight: bold; color: #00a5bb !important;">
                                                                                 Candidatar-se <i class="mdi mdi-chevron-double-right"></i>
                                                                             </a>
                                                                         </div>
@@ -373,14 +410,11 @@
                                                                         </div>
                                                                     </div>
                                                                     <div class="col-lg-6 col-md-5">
-                                                                        <div>
-                                                                            <p class="text-muted mb-0"><span class="text-dark">Escolaridade :</span>
-                                                                                {{job.educationScore}}/10 </p>
-                                                                        </div>
+                                                                        
                                                                     </div>
                                                                     <div class="col-lg-2 col-md-3">
                                                                         <div class="text-start text-md-end">
-                                                                            <a href="#applyNow" data-bs-toggle="modal" class="primary-link fw-bold text-primary" style="font-weight: bold; color: #00a5bb !important;">
+                                                                            <a href="javascript:void(0)" @click="openApplyModal(job.id)" class="primary-link fw-bold text-primary" style="font-weight: bold; color: #00a5bb !important;">
                                                                                 Candidatar-se <i class="mdi mdi-chevron-double-right"></i>
                                                                             </a>
                                                                         </div>
@@ -814,7 +848,8 @@
                     <!-- END CLIENT -->
 
                     <!-- START APPLY MODAL -->
-                    <div class="modal fade" id="applyNow" tabindex="-1" aria-labelledby="applyNow" aria-hidden="true">
+                     
+                    <div class="modal fade" id="applyNow" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="applyNow" aria-hidden="true">
                         <div class="modal-dialog modal-dialog-centered">
                             <div class="modal-content">
                                 <div class="modal-body p-5">
@@ -829,32 +864,29 @@
                                         <a href="/sign-in.html" class="btn btn-primary w-100">Fazer Login</a>
                                     </div>
                                     <div v-else>
+
+                               
                                         <!-- <div class="mb-3">
-                                            <label for="nameControlInput" class="form-label">Nome</label>
-                                            <input type="text" class="form-control" id="nameControlInput" placeholder="Digite seu nome">
-                                        </div>
-                                        <div class="mb-3">
-                                            <label for="emailControlInput2" class="form-label">E-mail</label>
-                                            <input type="email" class="form-control" id="emailControlInput2" placeholder="Digite seu e-mail">
-                                        </div> -->
-                                        <div class="mb-3">
                                             <label for="messageControlTextarea" class="form-label">Observação</label>
-                                            <textarea class="form-control" autofocus id="messageControlTextarea" rows="3" placeholder="Digite a sua Observação"></textarea>
-                                        </div>
-                                        <!-- <div class="mb-4">
-                                            <label class="form-label" for="inputGroupFile01">Anexar Currículo</label>
-                                            <input type="file" class="form-control" id="inputGroupFile01">
+                                            <textarea class="form-control" autofocus id="messageControlTextarea" rows="3" placeholder="Digite a sua Observação" v-model="applicationNote"></textarea>
                                         </div> -->
                                         <div class="alert alert-success text-center" v-if="applicationSent">
                                             Candidatura enviada com sucesso!
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-100">Enviar candidatura</button>
+                                        <div class="alert alert-danger text-center" v-if="applicationError">
+                                            {{ applicationError }}
+                                        </div>
+                                        <button v-if="!applicationSent" type="button" class="btn btn-primary w-100" :disabled="applicationLoading"  @click="sendApplication()"  >
+                                            <span v-if="applicationLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                            Enviar candidatura
+                                        </button>
+                                
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div><!-- END APPLY MODAL -->
-
+              
                 </div>
                 <!-- End Page-content -->
                 

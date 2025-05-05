@@ -17,17 +17,18 @@
                 window.vueApp({
             data() {
                 return {
-                    jobs: [],
+                    candidatures: [],
+                    applyStatus: [],
                     loading: true,
-                    jobsRaw:null,
+                    candidaturesRaw:null,
                 }
             },
             computed: {
                 filteredJobs() {
-                    if (!Array.isArray(this.jobs) || this.jobs.length === 0) {
+                    if (!Array.isArray(this.candidatures) || this.candidatures.length === 0) {
                         return [];
                     }
-                    return this.jobs.slice(0, 3);
+                    return this.candidatures.slice(0, 3);
                 },
                 isUserLogger() {
                     return !!localStorage.getItem('user');
@@ -35,7 +36,15 @@
                 userLogger() {
                     const user = localStorage.getItem('user')
                     return user ? JSON.parse('user') : null;
-                }              
+                },
+                userCandidate() {
+                    const candidate = localStorage.getItem('candidate')
+                    return candidate ? JSON.parse(candidate) : null;
+                },
+                userCandidateCheckStatus() {
+                    const candidateStatusCheck = localStorage.getItem('candidateStatusCheck')
+                    return candidateStatusCheck ? JSON.parse(candidateStatusCheck) : null;
+                }         
             },
             methods: {
                 formatDate(dateString) {
@@ -43,21 +52,57 @@
                     const options = { year: 'numeric', month: 'long', day: 'numeric' };
                     return new Date(dateString).toLocaleDateString('pt-BR', options);
                 },
-            },
-            mounted() {
-                fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job')
+                getApplystatus() {
+                fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application/status?isActive=true')
                     .then(res => res.json())
                     .then(data => {
-                        this.jobsRaw = data 
-                        this.jobs = data?.data?.data || []
+                        this.applyStatus = data?.data || [];
                     })
                     .catch(() => {
-                        this.jobs = [];
+                        this.applyStatus = [];
+                    });
+            },
+            getBadgeColorById(id) {
+                switch (id) {
+                    case 1: // Pendente
+                        return 'badge bg-warning-subtle text-warning';
+                    case 2: // Aprovado
+                        return 'badge bg-success-subtle text-success';
+                    case 3: // Rejeitado
+                        return 'badge bg-danger-subtle text-danger';
+                    case 4: // Em análise
+                        return 'badge bg-info-subtle text-info';
+                    case 5: // Entrevista
+                        return 'badge bg-primary-subtle text-primary';
+                    case 6: // Contratado
+                        return 'badge bg-success-subtle text-white';
+                    case 7: // Cancelado
+                        return 'badge bg-dark-subtle text-dark';
+                    default:
+                        return 'badge bg-secondary-subtle text-secondary';
+                }
+            },
+                getCadidatures() {
+                    fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application?candidateId=${this.userCandidate?.id}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        this.candidaturesRaw = data 
+                        this.candidatures = data?.data?.data || []
+                    })
+                    .catch(() => {
+                        this.candidatures = [];
                     })
                     .finally(() => {
                         this.loading = false;
                     });
+                }
+            },
+            mounted() {
+                this.getCadidatures()
+                // this.getApplystatus()
             }
+
+            
         }).mount('#job-list-vue-app-6');
         });
     
@@ -89,7 +134,7 @@
                                         <h6 class="mb-0"> Minhas Candidaturas </h6>
                                     </div>
                                 </div><!--end col-->
-                                <div class="col-lg-4">
+                                <!-- <div class="col-lg-4">
                                     <div class="candidate-list-widgets">
                                         <div class="row">
                                             <div class="col-lg-6">
@@ -102,7 +147,7 @@
                                                         <option value="rd">Rejeitada</option>
                                                     </select>
                                                 </div>
-                                            </div><!--end col-->
+                                            </div>
                                             <div class="col-lg-6">
                                                 <div class="selection-widget mt-2 mt-lg-0">
                                                     <label for="Estados" class="form-label text-secondary">Período</label>
@@ -114,10 +159,10 @@
                                                         <option value="ne">Últimos 2 anos</option>
                                                     </select>
                                                 </div>
-                                            </div><!--end col-->
-                                        </div><!--end row-->
-                                    </div><!--end candidate-list-widgets-->
-                                </div><!--end col-->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> -->
                             </div><!--end row-->
                             <div class="row"  v-if="!loading">
                                 <div class="col-lg-12">
@@ -166,38 +211,38 @@
                                     </div> --><!--end job-box-->
                                 </div><!--end col-->
                                 <div class="col-lg-12">
-                                    <div v-for="job in filteredJobs" :key="job.id" class="job-box card mt-4">
+                                    <div v-for="candidate in candidatures" :key="candidate.id" class="job-box card mt-4">
                                         <div class="card-body p-4">
                                             <div class="row">
                                                 <div class="col-lg-1">
-                                                    <a :href="`manage-jobs-post.html?job-id=${job.id}`"><img src="assets/images/featured-job/img-01.png" alt="" class="img-fluid rounded-3"></a>
+                                                    <a :href="`manage-jobs-post.html?job-id=${candidate.job.id}`"><img src="assets/images/featured-job/img-01.png" alt="" class="img-fluid rounded-3"></a>
                                                 </div><!--end col-->
                                                 <div class="col-lg-9">
                                                     <div class="mt-3 mt-lg-0">
-                                                        <h5 class="fs-17 mb-1"><a :href="`manage-jobs-post.html?job-id=${job.id}`" class="text-dark">{{job.title}}</a> <!-- <small class="text-muted fw-normal">(2-4 Anos Exp.)</small> --></h5>
+                                                        <h5 class="fs-17 mb-1"><a :href="`manage-jobs-post.html?job-id=${candidate.job.id}`" class="text-dark">{{candidate.job.title}}</a> <!-- <small class="text-muted fw-normal">(2-4 Anos Exp.)</small> --></h5>
                                                         <ul class="list-inline mb-0">
                                                             <li class="list-inline-item">
-                                                                <p class="text-muted fs-14 mb-0">Publicação: {{formatDate(job.createdAt)}}</p>
+                                                                <p class="text-muted fs-14 mb-0">Publicação: {{formatDate(candidate.job.createdAt)}}</p>
                                                             </li>
                                                             <li class="list-inline-item">
-                                                                <p class="text-muted fs-14 mb-0"><i class="mdi mdi-map-marker"></i> {{job.location}}</p>
+                                                                <p class="text-muted fs-14 mb-0"><i class="mdi mdi-map-marker"></i> {{candidate.job.location}}</p>
                                                             </li>
                                                             <li class="list-inline-item">
-                                                                <p class="text-muted fs-14 mb-0"><i class="uil uil-wallet"></i> Experiência :</span> <span class="ml-5">{{job.experienceScore}}</span>/10</p>
+                                                                <p class="text-muted fs-14 mb-0"><i class="uil uil-wallet"></i> Experiência :</span> <span class="ml-5">{{candidate.job.experienceScore}}</span>/10</p>
                                                             </li>
                                                         </ul>
                                                         <div class="mt-2">
                                                             <span class="badge bg-dark-subtle text-black mt-1"><strong>Tempo Integral</strong></span>
                                                         </div>
                                                         <div class="mt-3">
-                                                            <span><strong>Estado:</strong></span> <span class="badge  text-success border border-success  mt-1"><strong>Em análise</strong></span>
+                                                            <span><strong>Estado:</strong></span> <span class=" mt-1" :class="getBadgeColorById(candidate.status.id)"><strong>{{candidate.status.status}}</strong></span>
                                                         </div>
                                                     </div>
                                                 </div><!--end col-->
                                                 <div class="col-lg-2 align-self-center">
                                                     <ul class="list-inline mt-3 mb-0">
                                                         <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-placement="top" title="Ver Mais">
-                                                            <a :href="`manage-jobs-post.html?job-id=${job.id}`" class="avatar-sm success-bg-subtle d-inline-block text-center rounded-circle fs-18">
+                                                            <a :href="`manage-jobs-post.html?job-id=${candidate.job.id}`" class="avatar-sm success-bg-subtle d-inline-block text-center rounded-circle fs-18">
                                                                 <i class="mdi mdi-eye"></i>
                                                             </a>
                                                         </li>

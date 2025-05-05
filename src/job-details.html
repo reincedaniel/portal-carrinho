@@ -20,6 +20,11 @@
                 jobsRaw:null,
                 loadingActiveJob: true,
                 activeJob: null,
+                applicationNote: '',
+                applicationSent: false,
+                applicationLoading: false,
+                applicationError: '',
+                applicationJobId: null,
 
             }
         },
@@ -36,9 +41,61 @@
             userLogger() {
                 const user = localStorage.getItem('user')
                 return user ? JSON.parse('user') : null;
-            }              
+            },
+            userCandidate() {
+                const candidate = localStorage.getItem('candidate')
+                return candidate ? JSON.parse(candidate) : null;
+            },
+            userCandidateCheckStatus() {
+                const candidateStatusCheck = localStorage.getItem('candidateStatusCheck')
+                return candidateStatusCheck ? JSON.parse(candidateStatusCheck) : null;
+            }             
         },
         methods: {
+            openApplyModal(jobId) {
+                    this.applicationJobId = jobId;
+                    this.applicationNote = '';
+                    this.applicationSent = false;
+                    this.applicationError = '';
+                    this.applicationLoading = false;
+                    var modal = new bootstrap.Modal(document.getElementById('applyNow'));
+                    modal.show();
+                },
+            async sendApplication() {
+                
+                if (!this.isUserLogger) return;
+                this.applicationLoading = true;
+                this.applicationError = '';
+                this.applicationSent = false;
+                try {
+                    const candidate = this.userCandidate;
+                    const jobId = this.applicationJobId;
+                    if (!candidate || !candidate.id || !jobId) {
+                        this.applicationError = 'Dados do candidato ou vaga não encontrados.';
+                        this.applicationLoading = false;
+                        return;
+                    }
+                    const res = await fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            candidateId: candidate.id,
+                            jobId: jobId,
+                            note: this.applicationNote
+                        })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(() => ({}));
+                        this.applicationError = (err?.message==="Job application are exist"?"Já se candidatou nesta vaga!":err?.message) || 'Erro ao enviar candidatura.';
+                        this.applicationLoading = false;
+                        return;
+                    }
+                    this.applicationSent = true;
+                } catch (e) {
+                    this.applicationError = 'Erro ao enviar candidatura.';
+                }
+                this.applicationLoading = false;
+            },
             getCurrentUrl() {
                 return window.location.href;
             },
@@ -252,7 +309,7 @@
                                         <div class="card job-overview">
                                             <div class="card-body p-4">
                                                 <div class="mb-3">
-                                                    <a href="#applyNow" data-bs-toggle="modal" class="btn btn-primary btn-hover w-100 mt-2">Candidatar-se Agora <i class="uil uil-arrow-right"></i></a>
+                                                    <a  href="javascript:void(0)" @click="openApplyModal(activeJob.id)" class="btn btn-primary btn-hover w-100 mt-2">Candidatar-se Agora <i class="uil uil-arrow-right"></i></a>
                                                     <a href="bookmark-jobs.html" class="btn btn-soft-warning btn-hover w-100 mt-2"><i class="uil uil-bookmark"></i> Ver os Favoritos</a>
                                                 </div>
                                                 <h6 class="fs-17">Sobre a Vaga</h6>
@@ -510,47 +567,44 @@
                     </section>
                     <!-- START JOB-DEATILS -->
 
-                    <!-- START APPLY MODAL -->
-                    <div class="modal fade" id="applyNow" tabindex="-1" aria-labelledby="applyNow" aria-hidden="true">
-                        <div class="modal-dialog modal-dialog-centered">
-                            <div class="modal-content">
-                                <div class="modal-body p-5">
-                                    <div class="text-center mb-4">
-                                        <h5 class="modal-title" id="staticBackdropLabel">Candidatar-se a esta vaga</h5>
-                                    </div>
-                                    <div class="position-absolute end-0 top-0 p-3">
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
-                                    </div>
-                                    <div v-if="!isUserLogger" class="text-center">
-                                        <p class="mb-4">Você precisa fazer login para se candidatar a esta vaga.</p>
-                                        <a href="/sign-in.html" class="btn btn-primary w-100">Fazer Login</a>
-                                    </div>
-                                    <div v-else>
-                                        <!-- <div class="mb-3">
-                                            <label for="nameControlInput" class="form-label">Nome</label>
-                                            <input type="text" class="form-control" id="nameControlInput" placeholder="Digite seu nome">
+                        <!-- START APPLY MODAL -->
+                        <div class="modal fade" id="applyNow" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="applyNow" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-body p-5">
+                                        <div class="text-center mb-4">
+                                            <h5 class="modal-title" id="staticBackdropLabel">Candidatar-se a esta vaga</h5>
                                         </div>
-                                        <div class="mb-3">
-                                            <label for="emailControlInput2" class="form-label">E-mail</label>
-                                            <input type="email" class="form-control" id="emailControlInput2" placeholder="Digite seu e-mail">
-                                        </div> -->
-                                        <div class="mb-3">
-                                            <label for="messageControlTextarea" class="form-label">Observação</label>
-                                            <textarea class="form-control" autofocus id="messageControlTextarea" rows="3" placeholder="Digite a sua Observação"></textarea>
+                                        <div class="position-absolute end-0 top-0 p-3">
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Fechar"></button>
                                         </div>
-                                        <!-- <div class="mb-4">
-                                            <label class="form-label" for="inputGroupFile01">Anexar Currículo</label>
-                                            <input type="file" class="form-control" id="inputGroupFile01">
-                                        </div> -->
-                                        <div class="alert alert-success text-center" v-if="applicationSent">
-                                            Candidatura enviada com sucesso!
+                                        <div v-if="!isUserLogger" class="text-center">
+                                            <p class="mb-4">Você precisa fazer login para se candidatar a esta vaga.</p>
+                                            <a href="/sign-in.html" class="btn btn-primary w-100">Fazer Login</a>
                                         </div>
-                                        <button type="submit" class="btn btn-primary w-100">Enviar candidatura</button>
+                                        <div v-else>
+    
+                                   
+                                            <!-- <div class="mb-3">
+                                                <label for="messageControlTextarea" class="form-label">Observação</label>
+                                                <textarea class="form-control" autofocus id="messageControlTextarea" rows="3" placeholder="Digite a sua Observação" v-model="applicationNote"></textarea>
+                                            </div> -->
+                                            <div class="alert alert-success text-center" v-if="applicationSent">
+                                                Candidatura enviada com sucesso!
+                                            </div>
+                                            <div class="alert alert-danger text-center" v-if="applicationError">
+                                                {{ applicationError }}
+                                            </div>
+                                            <button v-if="!applicationSent" type="button" class="btn btn-primary w-100" :disabled="applicationLoading"  @click="sendApplication()"  >
+                                                <span v-if="applicationLoading" class="spinner-border spinner-border-sm me-2"></span>
+                                                Enviar candidatura
+                                            </button>
+                                    
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div><!-- END APPLY MODAL -->
+                        </div><!-- END APPLY MODAL -->
 
                 </div>
                 <!-- End Page-content -->

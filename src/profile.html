@@ -17,6 +17,9 @@
                                 window.vueApp({
                                     data() {
                                         return {
+                                            candidateActive:null,
+                                            loading: true,
+
                                         }
                                     },
                                     computed: {
@@ -26,17 +29,70 @@
                                         userLogger() {
                                             const user = localStorage.getItem('user')
                                             return user ? JSON.parse(user) : null;
-                                        }
+                                        },
+                                        userCandidate() {
+                                            const candidate = localStorage.getItem('candidate')
+                                            return candidate ? JSON.parse(candidate) : null;
+                                        },
+                                        
+                                        userCandidateCheckStatus() {
+                                            const candidateStatusCheck = localStorage.getItem('candidateStatusCheck')
+                                            return candidateStatusCheck ? JSON.parse(candidateStatusCheck) : null;
+                                        }  
                                     },
                                     methods: {
                                         logout() {
                                             localStorage.clear();
                                             window.location.reload();
                                             window.location.href = '/sign-in.html';
-                                        }
+                                        },
+                                        async getCandidate() {
+                                            this.loading = true;
+                                            const userLogger = this.userLogger;
+                                            if (!userLogger) return;
+                                            try {
+                                                const res = await fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
+                                                const data = await res.json();
+                                                console.log("getCandidate");
+                                                const candidate = data?.data?.data || [];
+                                                if (!candidate.length) return;
+                                                localStorage.setItem("candidate", JSON.stringify(candidate[0]));
+                                                this.candidateActive = candidate[0];
+                                                await this.getCandidateCheckStatus(userLogger);
+                                            } catch (e) {
+                                                // erro silencioso
+                                            }finally {
+                                                this.loading = false;
+                                            }
+                                        },
+                                        getCandidateCheckStatus() {
+                                            // Executa tudo e só retorna no final
+                                            const userLogger = this.userLogger;
+                                            return new Promise((resolve) => {
+                                                if (!userLogger) {
+                                                    resolve();
+                                                    return;
+                                                }
+                                                const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
+                                                if (!candidate || !candidate.id) {
+                                                    resolve();
+                                                    return;
+                                                }
+                                                fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
+                                                    .then(res => res.json())
+                                                    .then(data => {
+                                                        console.log("getCandidateCheckStatus");
+                                                        const candidateStatus = data?.data || null;
+                                                        localStorage.setItem("candidateStatusCheck", JSON.stringify(candidateStatus));
+                                                        resolve();
+                                                    })
+                                                    .catch(() => resolve());
+                                            });
+                                        },
                                     },
                                     mounted() {
                                         // localStorage.setItem('user', JSON.stringify({name: 'John Doe', email: 'ma@mail.com'}));
+                                        this.getCandidate()
                                     }
                                 }).mount('#job-list-vue-app-8');
             
@@ -66,10 +122,11 @@
                                     <div class="card profile-sidebar me-lg-4">
                                         <div class="card-body p-4">
                                             <div class="text-center pb-4 border-bottom">
-                                                <img src="assets/images/profile.jpg" alt=""
+                                                <!-- candidateActive?.photoUrl ||  -->
+                                                <img :src="candidateActive?.photoUrl || 'assets/images/profile.jpg'" alt=""
                                                     class="avatar-lg img-thumbnail rounded-circle mb-4" />
-                                                <h5 class="mb-0">{{userLogger?.email.split('@')[0]}}</h5>
-                                                <p class="text-muted">{{userLogger?.email}}</p>
+                                                <h5 class="mb-0">{{ candidateActive?.name || 'Nome não informado' }}</h5>
+                                                <p class="text-muted">{{ userLogger?.email }}</p>
                                                 <ul class="list-inline d-flex justify-content-center align-items-center ">
                                                     <li class="list-inline-item text-warning fs-19">
                                                         <i class="mdi mdi-star"></i>
@@ -80,26 +137,20 @@
                                                     </li>
                                                 </ul>
                                                 <ul class="candidate-detail-social-menu list-inline mb-0">
-                                                    <li class="list-inline-item">
-                                                        <a href="javascript:void(0)" class="social-link rounded-3 btn-soft-primary"><i
-                                                                class="uil uil-facebook-f"></i></a>
+                                                    <li class="list-inline-item" v-if="candidateActive?.emails?.length">
+                                                        <a :href="'mailto:' + candidateActive.emails[0]" class="social-link rounded-3 btn-soft-primary">
+                                                            <i class="uil uil-envelope"></i>
+                                                        </a>
                                                     </li>
-                                                    <li class="list-inline-item">
-                                                        <a href="javascript:void(0)" class="social-link rounded-3 btn-soft-info"><i
-                                                                class="uil uil-twitter-alt"></i></a>
-                                                    </li>
-                                                    <li class="list-inline-item">
-                                                        <a href="javascript:void(0)" class="social-link rounded-3 btn-soft-success"><i
-                                                                class="uil uil-whatsapp"></i></a>
-                                                    </li>
-                                                    <li class="list-inline-item">
-                                                        <a href="javascript:void(0)" class="social-link rounded-3 btn-soft-danger"><i
-                                                                class="uil uil-phone-alt"></i></a>
+                                                    <li class="list-inline-item" v-if="candidateActive?.phoneNumbers?.length">
+                                                        <a :href="'https://wa.me/' + candidateActive.phoneNumbers[0].number.replace(/\D/g, '')" target="_blank" class="social-link rounded-3 btn-soft-success">
+                                                            <i class="uil uil-whatsapp"></i>
+                                                        </a>
                                                     </li>
                                                 </ul>
                                             </div>
                                             <!--end profile-->
-                                            <div class="mt-4 border-bottom pb-4">
+                                            <div class="mt-4 border-bottom pb-4" v-if="candidateActive?.cvUrl">
                                                 <h5 class="fs-17 fw-bold mb-3">Documentos</h5>
                                                 <ul class="profile-document list-unstyled mb-0">
                                                     <li>
@@ -109,24 +160,12 @@
                                                             </div>
                                                             <div class="ms-3">
                                                                 <h6 class="fs-16 mb-0">Currículo.pdf</h6>
-                                                                <p class="text-muted mb-0">1.25 MB</p>
+                                                                <p class="text-muted mb-0">Arquivo</p>
                                                             </div>
                                                             <div class="ms-auto">
-                                                                <a href="assets/images/dark-logo.png" download class="fs-20 text-muted"><i class="uil uil-import"></i></a>
-                                                            </div>
-                                                        </div>
-                                                    </li>
-                                                    <li>
-                                                        <div class="profile-document-list d-flex align-items-center mt-4 ">
-                                                            <div class="icon flex-shrink-0">
-                                                                <i class="uil uil-file"></i>
-                                                            </div>
-                                                            <div class="ms-3">
-                                                                <h6 class="fs-16 mb-0">Carta de apresentação.pdf</h6>
-                                                                <p class="text-muted mb-0">1.25 MB</p>
-                                                            </div>
-                                                            <div class="ms-auto">
-                                                                <a href="assets/images/dark-logo.png" download="dark-logo" class="fs-20 text-muted"><i class="uil uil-import"></i></a>
+                                                                <a :href="candidateActive.cvUrl" target="_blank" class="fs-20 text-muted">
+                                                                    <i class="uil uil-import"></i>
+                                                                </a>
                                                             </div>
                                                         </div>
                                                     </li>
@@ -137,29 +176,29 @@
                                                 <h5 class="fs-17 fw-bold mb-3">Contatos</h5>
                                                 <div class="profile-contact">
                                                     <ul class="list-unstyled mb-0">
-                                                        <li>
+                                                        <li v-if="candidateActive?.emails?.length">
                                                             <div class="d-flex">
                                                                 <label>Email</label>
                                                                 <div>
                                                                     <p class="text-muted text-break mb-0">
-                                                                        {{userLogger?.email}}
+                                                                        {{ candidateActive.emails[0] }}
                                                                     </p>
                                                                 </div>
                                                             </div>
                                                         </li>
-                                                        <li>
+                                                        <li v-if="candidateActive?.phoneNumbers?.length">
                                                             <div class="d-flex">
                                                                 <label>Telefone</label>
                                                                 <div>
-                                                                    <p class="text-muted mb-0">+244 945 678 0000</p>
+                                                                    <p class="text-muted mb-0">{{ candidateActive.phoneNumbers[0].number }}</p>
                                                                 </div>
                                                             </div>
                                                         </li>
-                                                        <li>
+                                                        <li v-if="candidateActive?.location">
                                                             <div class="d-flex">
                                                                 <label>Localização</label>
                                                                 <div>
-                                                                    <p class="text-muted mb-0">Luanda, Angola</p>
+                                                                    <p class="text-muted mb-0">{{ candidateActive.location }}</p>
                                                                 </div>
                                                             </div>
                                                         </li>
@@ -193,101 +232,74 @@
                                                 </li>
                                             </ul>
                                         <div class="card-body p-4">
+                                            <!-- <pre>{{candidateActive}}</pre> -->
+                                           
                                         <div class="card-body p-4">
                                             <div class="tab-content" id="pills-tabContent">
                                                 <div class="tab-pane fade show active" id="overview" role="tabpanel"
                                                     aria-labelledby="overview-tab">
+
                                                     <div>
                                                         <h5 class="fs-18 fw-bold">Sobre</h5>
                                                         <p class="text-muted mt-4">
-                                                            Desenvolvedor com mais de 5 anos de experiência atuando nos setores público e privado. Diplomático, comunicativo e habilidoso em gerenciar situações sensíveis. Altamente organizado, autodidata e proficiente em informática. Busca aumentar os índices de satisfação dos alunos da <b>Universidade Internacional</b>. Bacharel em comunicação.
-                                                        </p>
-                                                        <p class="text-muted">
-                                                            Descreve a experiência relevante, habilidades e conquistas do candidato. O objetivo deste resumo de carreira é explicar suas qualificações para o cargo em 3-5 frases e convencer o gestor a ler todo o currículo.
+                                                            {{ candidateActive?.description || candidateActive?.summary || 'Sem descrição disponível.' }}
                                                         </p>
                                                     </div>
-                                                    <div class="candidate-education-details mt-4">
+
+                                                    <div class="candidate-education-details mt-4" v-if="candidateActive?.education?.length">
                                                         <h6 class="fs-18 fw-bold mb-0">Educação</h6>
-                                                        <div class="candidate-education-content mt-4 d-flex">
+                                                        <div v-for="(edu, idx) in candidateActive.education" :key="idx" class="candidate-education-content mt-4 d-flex">
                                                             <div class="circle flex-shrink-0 primary-bg-subtle">
-                                                                B
+                                                                <strong class="text-primary">{{ edu.course ? edu.course.charAt(0).toUpperCase() : 'E' }}</strong>
                                                             </div>
                                                             <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">
-                                                                    BCA - Bacharel em Aplicações de Computador
-                                                                </h6>
+                                                                <h6 class="fs-16 mb-1">{{ edu.course }}</h6>
                                                                 <p class="mb-2 text-muted">
-                                                                    Universidade Internacional - (2004 - 2010)
+                                                                    {{ edu.institute }} <span v-if="edu.location">- {{ edu.location }}</span>
+                                                                    <span v-if="edu.period">({{ edu.period }})</span>
                                                                 </p>
-                                                                <p class="text-muted">
-                                                                    Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="candidate-education-content mt-3 d-flex">
-                                                            <div class="circle flex-shrink-0 primary-bg-subtle">
-                                                                M
-                                                            </div>
-                                                            <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">
-                                                                    MCA - Mestre em Aplicações de Computador
-                                                                </h6>
-                                                                <p class="mb-2 text-muted">
-                                                                    Universidade Internacional - (2010 - 2012)
-                                                                </p>
-                                                                <p class="text-muted">
-                                                                    Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.
-                                                                </p>
-                                                            </div>
-                                                        </div>
-                                                        <div class="candidate-education-content mt-3 d-flex">
-                                                            <div class="circle flex-shrink-0 primary-bg-subtle">
-                                                                D
-                                                            </div>
-                                                            <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">Design de Comunicação Visual</h6>
-                                                                <p class="text-muted mb-2">
-                                                                    Universidade Internacional - (2012-2015)
-                                                                </p>
-                                                                <p class="text-muted">
-                                                                    Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.
-                                                                </p>
+                                                                <!-- <p class="text-muted">
+                                                               
+                                                                </p> -->
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="candidate-education-details mt-4">
+
+                                                    <div class="candidate-education-details mt-4" v-if="candidateActive?.experiences?.length">
                                                         <h6 class="fs-18 fw-bold mb-0">Experiências</h6>
-                                                        <div class="candidate-education-content mt-4 d-flex">
-                                                            <div class="circle flex-shrink-0 primary-bg-subtle"> W </div>
-                                                            <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">Líder de Equipe de Web Design & Desenvolvimento</h6>
-                                                                <p class="mb-2 text-muted">Agência Criativa - (2013 - 2016)</p>
-                                                                <p class="text-muted">Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.</p>
+                                                        <div v-for="(exp, idx) in candidateActive.experiences" :key="idx" class="candidate-education-content mt-4 d-flex">
+                                                            <div class="circle flex-shrink-0 primary-bg-subtle">
+                                                                <strong class="text-primary">{{ exp.position ? exp.position.charAt(0).toUpperCase() : 'E' }}</strong>
                                                             </div>
-                                                        </div>
-                                                        <div class="candidate-education-content mt-4 d-flex">
-                                                            <div class="circle flex-shrink-0 primary-bg-subtle"> P </div>
                                                             <div class="ms-4">
-                                                                <h6 class="fs-16 mb-1">Gerente de Projetos</h6>
-                                                                <p class="mb-2 text-muted">Jobcy Technology Pvt.Ltd - (Atual)</p>
-                                                                <p class="text-muted mb-0">Existem muitas variações de passagens disponíveis, mas a maioria sofreu alguma alteração. Profissional altamente qualificado e bem-sucedido em desenvolvimento de produtos e design, com mais de 4 anos de experiência.</p>
+                                                                <h6 class="fs-16 mb-1">{{ exp.position }}</h6>
+                                                                <p class="mb-2 text-muted">{{ exp.company }} <span v-if="exp.period">- {{ exp.period }}</span></p>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div class="mt-4">
+
+                                                    <div class="mt-4" v-if="candidateActive?.skills?.length">
                                                         <h5 class="fs-18 fw-bold">Habilidades</h5>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Gestão em Nuvem</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Design Responsivo</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Arquitetura de Redes</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">PHP</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">Bootstrap</span>
-                                                        <span class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">UI & UX Designer</span>
+                                                        <span v-for="(skill, idx) in candidateActive.skills" :key="idx"
+                                                            class="badge fs-13 bg-primary-subtle text-primary mt-2 me-2">{{ skill }}</span>
                                                     </div>
-                                                    <div class="mt-4">
+
+                                                    <div class="mt-4" v-if="candidateActive?.languages?.length">
                                                         <h5 class="fs-18 fw-bold">Idiomas falados</h5>
-                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2 me-2">Inglês</span>
-                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2 me-2">Alemão</span>
-                                                        <span class="badge fs-13 bg-success-subtle text-success mt-2 me-2">Francês</span>
+                                                        <span v-for="(lang, idx) in candidateActive.languages" :key="idx"
+                                                            class="badge fs-13 bg-success-subtle text-success mt-2 me-2">{{ lang }}</span>
+                                                    </div>
+
+                                                    <div class="mt-4" v-if="candidateActive?.location">
+                                                        <h5 class="fs-18 fw-bold">Localização</h5>
+                                                        <span class="badge fs-13 bg-primary text-white mt-2 me-2">{{ candidateActive.location }}</span>
+                                                    </div>
+
+                                                    <div class="mt-4" v-if="candidateActive?.cvUrl">
+                                                        <h5 class="fs-18 fw-bold">Currículo</h5>
+                                                        <a :href="candidateActive.cvUrl" target="_blank" class="btn btn-outline-primary">
+                                                            <i class="uil uil-file-alt me-2"></i>Ver Currículo
+                                                        </a>
                                                     </div>
                                                 </div>
                                                 <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="settings-tab">
@@ -311,6 +323,7 @@
                                                                         <label for="firstName" class="form-label">Nome</label>
                                                                         <input type="text" class="form-control" id="firstName"
                                                                             :value="userLogger?.email.split('@')[0]" />
+
                                                                     </div>
                                                                 </div>
                                                                 <!--end col-->

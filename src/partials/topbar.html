@@ -185,7 +185,7 @@
                     <span class="d-none d-md-inline">Entrar</span><i class="mdi mdi-login fs-22"></i>
                 </a>
             </li>
-            <li class="list-inline-item dropdown me-4"  v-if="isUserLogger">
+            <li class="list-inline-item dropdown me-4 d-none"  v-if="false">
                 <a href="javascript:void(0)" class="header-item noti-icon position-relative" id="notification" data-bs-toggle="dropdown"
                     aria-expanded="false">
                     <i class="mdi mdi-bell fs-22"></i>
@@ -210,7 +210,7 @@
                                         ago</span></p>
                                 </div>
                             </div>
-                        </a><!--end notification-item-->
+                        </a>
                         <a href="javascript:void(0)" class="text-dark notification-item d-block">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-3">
@@ -222,7 +222,7 @@
                                         ago</span></p>
                                 </div>
                             </div>
-                        </a><!--end notification-item-->
+                        </a>
                         <a href="javascript:void(0)" class="text-dark notification-item d-block">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-3">
@@ -235,7 +235,7 @@
                                         ago</span></p>
                                 </div>
                             </div>
-                        </a><!--end notification-item-->
+                        </a>
                         <a href="javascript:void(0)" class="text-dark notification-item d-block">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-3">
@@ -248,7 +248,7 @@
                                         ago</span></p>
                                 </div>
                             </div>
-                        </a><!--end notification-item-->
+                        </a>
                         <a href="javascript:void(0)" class="text-dark notification-item d-block">
                             <div class="d-flex align-items-center">
                                 <div class="flex-shrink-0 me-3">
@@ -261,8 +261,8 @@
                                         ago</span></p>
                                 </div>
                             </div>
-                        </a><!--end notification-item-->
-                    </div><!--end notification-wrapper-->
+                        </a>
+                    </div>
                     <div class="notification-footer border-top text-center">
                         <a class="primary-link fs-13" href="javascript:void(0)">
                             <i class="mdi mdi-arrow-right-circle me-1"></i> <span>View More..</span>
@@ -273,7 +273,7 @@
             <li class="list-inline-item dropdown" v-if="isUserLogger">
                 <a href="javascript:void(0)" class="header-item" id="userdropdown" data-bs-toggle="dropdown"
                     aria-expanded="false">
-                    <img src="assets/images/profile.jpg" alt="mdo" width="35" height="35" class="rounded-circle me-1"> <span class="d-none d-md-inline-block fw-medium">{{userLogger.email.split('@')[0]}}</span>
+                    <img src="assets/images/profile.jpg" alt="mdo" width="35" height="35" class="rounded-circle me-1"> <span class="d-none d-md-inline-block fw-medium">{{(userCandidate && userCandidate.name)|| userLogger.email.split('@')[0]}}</span>
                 </a>
                 <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userdropdown">
                     <li><a class="dropdown-item" href="manage-jobs.html">Minhas Candidaturas</a></li>
@@ -289,6 +289,11 @@
     </div>
     <!--end container-->
 </nav>
+<div class="job-list-vue-app-x d-none d-md-block">
+    <div v-if="isUserLogger && ( !userCandidateCheckStatus || !(userCandidateCheckStatus && userCandidateCheckStatus.isComplete))" class="alert alert-warning text-center mb-0" style="position:relative; z-index:1050;">
+        <strong>Atenção:</strong> Precisa concluir o seu perfil. <a href="/profile.html" class="alert-link">Clique aqui para completar seu perfil.</a>
+    </div>
+</div>
 <!-- Navbar End -->
 
 
@@ -356,6 +361,14 @@ document.addEventListener('DOMContentLoaded', function () {
                             userLogger() {
                                 const user = localStorage.getItem('user')
                                 return user ? JSON.parse(user) : null;
+                            },
+                            userCandidate() {
+                                const candidate = localStorage.getItem('candidate')
+                                return candidate ? JSON.parse(candidate) : null;
+                            },
+                            userCandidateCheckStatus() {
+                                const candidateStatusCheck = localStorage.getItem('candidateStatusCheck')
+                                return candidateStatusCheck ? JSON.parse(candidateStatusCheck) : null;
                             }
                         },
                         methods: {
@@ -363,13 +376,100 @@ document.addEventListener('DOMContentLoaded', function () {
                                 localStorage.clear();
                                 window.location.reload();
                                 window.location.href = '/sign-in.html';
-                            }
+                            },
+                            getCandidate() {
+                                if(!this.userLogger) return;
+                                fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${this.userLogger.userId}&pageSize=1&pageNumber=1`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const candidate = data?.data?.data || [];
+                                        if(!candidate.length) return;
+                                        localStorage.setItem("candidate", JSON.stringify(candidate[0]));
+                                        this.getCandidateCheckStatus()
+                                    })
+                                    .catch(() => {
+                                        
+                                    });
+                            },
+                            getCandidateCheckStatus() {
+                                if (!this.userLogger) return;
+                                const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
+                                if (!candidate || !candidate.id) return;
+                                return fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const candidate = data?.data || null;
+                                        localStorage.setItem("candidateStatusCheck", JSON.stringify(candidate));
+                                    })
+                                    .catch(() => null);
+                            },
                         },
                         mounted() {
+                            this.getCandidate();
                         }
                     }).mount('.job-list-vue-app-0');
 
 
+
+                    window.vueApp({
+                        data() {
+                            return {
+                            }
+                        },
+                        computed: {
+                            isUserLogger() {
+                                return !!localStorage.getItem('user');
+                            },
+                            userLogger() {
+                                const user = localStorage.getItem('user')
+                                return user ? JSON.parse(user) : null;
+                            },
+                            userCandidate() {
+                                const candidate = localStorage.getItem('candidate')
+                                return candidate ? JSON.parse(candidate) : null;
+                            },
+                            userCandidateCheckStatus() {
+                                const candidateStatusCheck = localStorage.getItem('candidateStatusCheck')
+                                return candidateStatusCheck ? JSON.parse(candidateStatusCheck) : null;
+                            }
+                        },
+                        methods: {
+                            logout() {
+                                localStorage.clear();
+                                window.location.reload();
+                                window.location.href = '/sign-in.html';
+                            },
+                            getCandidate() {
+                                if(!this.userLogger) return;
+                                fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${this.userLogger.userId}&pageSize=1&pageNumber=1`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const candidate = data?.data?.data || [];
+                                        if(!candidate.length) return;
+                                        localStorage.setItem("candidate", JSON.stringify(candidate[0]));
+                                        this.getCandidateCheckStatus()
+                                    })
+                                    .catch(() => {
+                                        
+                                    });
+                            },
+                            getCandidateCheckStatus() {
+                                if (!this.userLogger) return;
+                                const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
+                                if (!candidate || !candidate.id) return;
+                                return fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
+                                    .then(res => res.json())
+                                    .then(data => {
+                                        const candidate = data?.data || null;
+                                        localStorage.setItem("candidateStatusCheck", JSON.stringify(candidate));
+                                    })
+                                    .catch(() => null);
+                            },
+                        },
+                        mounted() {
+                            // this.getCandidate();
+                        }
+                    }).mount('.job-list-vue-app-x');
                     window.vueApp({
                         data() {
                             return {

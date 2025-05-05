@@ -26,7 +26,8 @@
                 },
                 methods: {
                     validateEmail(email) {
-                        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        // Permite e-mails sem ponto após o @, mas exige pelo menos um caractere antes e depois do @
+                        const re = /^[^\s@]+@[^\s@]+$/;
                         return re.test(email);
                     },
                     validateForm() {
@@ -81,22 +82,81 @@
                                 this.loading = false;
                                 return;
                             }
+
+                            if (Array.isArray(data.data?.roles) && data.data.roles.length === 1 && data.data.roles[0] === "Admin") {
+                                this.showNotification("Esta conta não tem permissão para acessar o portal", 'error');
+                                this.loading = false;
+                                return;
+                            }
+                            localStorage.clear();
                             localStorage.setItem("user", JSON.stringify(data.data));
                             localStorage.setItem("token", data.data?.token);
-                            this.showNotification("Login realizado com sucesso!", 'success');
+                            this.getCandidate(data.data).then(() => {
+                                this.showNotification("Login realizado com sucesso!", 'success');
                             this.payload = {
                                 email: '',
                                 password: ''
                             };
                             setTimeout(() => {
-                                window.location.href = "index.html";
+                            window.location.href = "index.html";
+
                             }, 500);
+                            }).catch(() => {
+                                this.showNotification("Login realizado com sucesso!", 'success');
+                            this.payload = {
+                                email: '',
+                                password: ''
+                            };
+                            setTimeout(() => {
+                            window.location.href = "index.html";
+
+                            }, 500);
+                            });
+                            
                         } catch (err) {
                             this.showNotification("Erro ao conectar ao servidor.", 'error');
                         } finally {
                             this.loading = false;
                         }
-                    }
+                    },
+                    async getCandidate(userLogger) {
+                        if (!userLogger) return;
+                        try {
+                            const res = await fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
+                            const data = await res.json();
+                            console.log("getCandidate");
+                            const candidate = data?.data?.data || [];
+                            if (!candidate.length) return;
+                            localStorage.setItem("candidate", JSON.stringify(candidate[0]));
+                            await this.getCandidateCheckStatus(userLogger);
+                        } catch (e) {
+                            // erro silencioso
+                        }
+                    },
+                    getCandidateCheckStatus(userLogger) {
+                        // Executa tudo e só retorna no final
+
+                        return new Promise((resolve) => {
+                            if (!userLogger) {
+                                resolve();
+                                return;
+                            }
+                            const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
+                            if (!candidate || !candidate.id) {
+                                resolve();
+                                return;
+                            }
+                            fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
+                                .then(res => res.json())
+                                .then(data => {
+                                    console.log("getCandidateCheckStatus");
+                                    const candidateStatus = data?.data || null;
+                                    localStorage.setItem("candidateStatusCheck", JSON.stringify(candidateStatus));
+                                    resolve();
+                                })
+                                .catch(() => resolve());
+                        });
+                    },
                 }
             }).mount('#job-list-vue-app-5');
         });

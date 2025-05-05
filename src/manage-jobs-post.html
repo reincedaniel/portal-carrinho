@@ -22,6 +22,7 @@
                     jobsRaw:null,
                     loadingActiveJob: true,
                     activeJob: null,
+                    activeApply: null,
     
                 }
             },
@@ -38,9 +39,37 @@
                 userLogger() {
                     const user = localStorage.getItem('user')
                     return user ? JSON.parse('user') : null;
-                }              
+                },
+                userCandidate() {
+                    const candidate = localStorage.getItem('candidate')
+                    return candidate ? JSON.parse(candidate) : null;
+                },
+                userCandidateCheckStatus() {
+                    const candidateStatusCheck = localStorage.getItem('candidateStatusCheck')
+                    return candidateStatusCheck ? JSON.parse(candidateStatusCheck) : null;
+                }                
             },
             methods: {
+                getBadgeColorById(id) {
+                switch (id) {
+                    case 1: // Pendente
+                        return 'badge bg-warning-subtle text-warning';
+                    case 2: // Aprovado
+                        return 'badge bg-success-subtle text-success';
+                    case 3: // Rejeitado
+                        return 'badge bg-danger-subtle text-danger';
+                    case 4: // Em análise
+                        return 'badge bg-info-subtle text-info';
+                    case 5: // Entrevista
+                        return 'badge bg-primary-subtle text-primary';
+                    case 6: // Contratado
+                        return 'badge bg-success-subtle text-white';
+                    case 7: // Cancelado
+                        return 'badge bg-dark-subtle text-dark';
+                    default:
+                        return 'badge bg-secondary-subtle text-secondary';
+                }
+            },
                 getCurrentUrl() {
                     return window.location.href;
                 },
@@ -57,11 +86,17 @@
                         if (!jobId) return;
                     }
                         this.loadingActiveJob = true;
-    
-                        fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job/${jobId}`)
+                        
+                        fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application?jobId=${jobId}&candidateId=${this.userCandidate?.id}&pageSize=1&pageNumber=1`)
                             .then(res => res.json())
                             .then(data => {
-                                this.activeJob = data?.data || null;
+                                const act = data?.data?.data || []
+                                if(!act || act.length === 0) {
+                                    this.activeJob = null;
+                                    return;
+                                }
+                                this.activeJob = act[0].job || null;
+                                this.activeApply = act[0] || null;
                             })
                             .catch(() => {
                                 this.activeJob = null;
@@ -254,30 +289,41 @@
                                             <h5 class="mb-0 fs-17">Status da Vaga</h5>
                                         </div>
                                     </div>
+
+                                    <!-- <pre>{{activeApply}}</pre> -->
                                 </div>
                                 <div class="card mt-4"></div>
                                     <div class="card-body"></div>
                                         <div class="row">
                                             <div class="col-lg-6">
                                                 <div class="my-4">
-                                                    <h6>Estado Atual</h6>
-                                                    <p class="badge bg-success">Activa</p>
-                                                </div>
+                                                    <h6>Código da Candidatura</h6>
+                                                   
+                                                        <div class="mb-4">
+                                                            <span style="font-size: 0.7em;" class="badge bg-primary-subtle text-primary"><strong>{{ activeApply?.code }}</strong></span>
+                                                        </div>
+                                                    </div>
                                                 <div class="mb-4">
                                                     <h6>Data de Aplicação</h6>
-                                                    <p>{{ formatDate(activeJob?.createdAt) }}</p>
+                                                    <p>{{ formatDate(activeApply?.createdAt) }}</p>
                                                 </div>
                                             </div>
                                             <div class="col-lg-6">
-                                                <div class="my-4">
+                                                
+
+                                                    <div class="my-4">
+                                                        <h6>Estado Atual</h6>
+                                                        <span class=" mt-1" :class="getBadgeColorById(activeApply?.status?.id)"><strong>{{activeApply?.status?.status}}</strong></span>
+                                                    </div>
+                                               <!--  <div class="my-4">
                                                     <h6>Progresso da Candidatura</h6>
                                                    
                                                         <div class="progress mb-4">
                                                             <div class="progress-bar bg-primary" role="progressbar" style="width: 75%" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
                                                         </div>
                                                     </div>
-                                                </div>
-                                                <div class="mb-4">
+                                                </div> -->
+                                                <!-- <div class="mb-4">
                                                     <h6>Próximas Etapas</h6>
                                                     <ul class="list-unstyled">
                                                         <li><i class="mdi mdi-check-circle text-success"></i> Análise Curricular</li>
@@ -285,12 +331,12 @@
                                                         <li><i class="mdi mdi-circle-outline"></i> Entrevista RH</li>
                                                         <li><i class="mdi mdi-circle-outline"></i> Entrevista Final</li>
                                                     </ul>
-                                                </div>
+                                                </div> -->
 
                                                 <div class="mt-4"></div>
                                                     <div class="text-end">
-                                                        <a href="#cancelModal" data-bs-toggle="modal" class="btn btn-danger me-2"><i class="mdi mdi-close-circle me-1"></i> Cancelar Processo</a>
-                                                        <a href="#feedbackModal" data-bs-toggle="modal" class="btn btn-primary">Solicitar Feedback <i class="mdi mdi-send"></i></a>
+                                                       <!-- <a href="#cancelModal" data-bs-toggle="modal" class="btn btn-danger me-2"><i class="mdi mdi-close-circle me-1"></i> Cancelar Processo</a>
+                                                         <a href="#feedbackModal" data-bs-toggle="modal" class="btn btn-primary">Solicitar Feedback <i class="mdi mdi-send"></i></a> -->
                                                     </div>
                                                 </div>
                                             </div>
