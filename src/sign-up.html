@@ -104,7 +104,7 @@
                         }
                         this.loading = true;
                         try {
-                            const url = "https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/auth/register";
+                            const url = "http://humanresource-api.mayacode.co/api/v1/auth/register";
                             const response = await fetch(url, {
                                 method: "POST",
                                 headers: {
@@ -177,7 +177,7 @@
                     async getCandidate(userLogger) {
                         if (!userLogger) return;
                         try {
-                            const res = await fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
+                            const res = await fetch(`http://humanresource-api.mayacode.co/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
                             const data = await res.json();
                             console.log("getCandidate");
                             const candidate = data?.data?.data || [];
@@ -201,7 +201,7 @@
                                 resolve();
                                 return;
                             }
-                            fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
+                            fetch(`http://humanresource-api.mayacode.co/api/v1/candidate/${candidate.id}/check`)
                                 .then(res => res.json())
                                 .then(data => {
                                     console.log("getCandidateCheckStatus");

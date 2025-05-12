@@ -1563,7 +1563,7 @@
                             },
                         },
                         mounted() {
-                            fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job')
+                            fetch('http://humanresource-api.mayacode.co/api/v1/job')
                                 .then(res => res.json())
                                 .then(data => {
                                     this.jobsRaw = data //  Array.isArray(data?.data) ? data?.data : [];
