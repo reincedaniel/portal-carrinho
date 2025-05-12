@@ -87,7 +87,7 @@
                     }
                         this.loadingActiveJob = true;
                         
-                        fetch(`http://humanresource-api.mayacode.co/api/v1/job-application?jobId=${jobId}&candidateId=${this.userCandidate?.id}&pageSize=1&pageNumber=1`)
+                        fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application?jobId=${jobId}&candidateId=${this.userCandidate?.id}&pageSize=1&pageNumber=1`)
                             .then(res => res.json())
                             .then(data => {
                                 const act = data?.data?.data || []
@@ -106,7 +106,7 @@
                             });
                     },
                 getJobs() {
-                    fetch('http://humanresource-api.mayacode.co/api/v1/job')
+                    fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job')
                     .then(res => res.json())
                     .then(data => {
                         this.jobsRaw = data 

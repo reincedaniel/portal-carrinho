@@ -85,7 +85,7 @@
                             this.applicationLoading = false;
                             return;
                         }
-                        const res = await fetch('http://humanresource-api.mayacode.co/api/v1/job-application', {
+                        const res = await fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application', {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
@@ -112,7 +112,7 @@
                     return new Date(dateString).toLocaleDateString('pt-BR', options);
                 },
                 getJobCategory() {
-                    fetch('http://humanresource-api.mayacode.co/api/v1/job/category?isActive=true')
+                    fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job/category?isActive=true')
                         .then(res => res.json())
                         .then(data => {
                             this.jobCategories = data?.data || [];
@@ -122,7 +122,7 @@
                         });
                 },
                 getJobs() {
-                fetch('http://humanresource-api.mayacode.co/api/v1/job')
+                fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job')
                 .then(res => res.json())
                 .then(data => {
                     this.jobsRaw = data 
@@ -140,7 +140,7 @@
                                 if (!this.userLogger) return;
                                 const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
                                 if (!candidate || !candidate.id) return;
-                                return fetch(`http://humanresource-api.mayacode.co/api/v1/candidate/${candidate.id}/check`)
+                                return fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
                                     .then(res => res.json())
                                     .then(data => {
                                         const candidate = data?.data || null;

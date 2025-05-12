@@ -73,7 +73,7 @@
                                            this.loadingPicture = true;
 
                                            try {
-                                               const response = await fetch('http://humanresource-api.mayacode.co/api/v1/candidate/picture', {
+                                               const response = await fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/picture', {
                                                    method: 'PUT',
                                                    body: formData
                                                });
@@ -163,7 +163,7 @@
                                             this.loadingProfile = true;
                                             try {
                                                 const response = await fetch(
-                                                    'http://humanresource-api.mayacode.co/api/v1/candidate',
+                                                    'https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate',
                                                     {
                                                         method: 'POST',
                                                         headers: { 'Content-Type': 'application/json' },
@@ -208,7 +208,7 @@
                                             this.loadingCV = true;
 
                                             try {
-                                                const response = await fetch('http://humanresource-api.mayacode.co/api/v1/candidate/cv/extract-data', {
+                                                const response = await fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/cv/extract-data', {
                                                     method: 'POST',
                                                     body: formData
                                                 });
@@ -252,7 +252,7 @@
                                             const userLogger = this.userLogger;
                                             if (!userLogger) return;
                                             try {
-                                                const res = await fetch(`http://humanresource-api.mayacode.co/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
+                                                const res = await fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
                                                 const data = await res.json();
                                                 const candidate = data?.data?.data || [];
                                                 if (!candidate.length) return;
@@ -301,7 +301,7 @@
                                             const userLogger = this.userLogger;
                                             if (!userLogger) return;
                                             try {
-                                                const res = await fetch(`http://humanresource-api.mayacode.co/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
+                                                const res = await fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${userLogger.userId}&pageSize=1&pageNumber=1`);
                                                 const data = await res.json();
                                                 const candidate = data?.data?.data || [];
                                                 if (!candidate.length) return;
@@ -328,7 +328,7 @@
                                                     resolve();
                                                     return;
                                                 }
-                                                fetch(`http://humanresource-api.mayacode.co/api/v1/candidate/${candidate.id}/check`)
+                                                fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
                                                     .then(res => res.json())
                                                     .then(data => {
                                                         const candidateStatus = data?.data || null;

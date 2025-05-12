@@ -379,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             },
                             getCandidate() {
                                 if(!this.userLogger) return;
-                                fetch(`http://humanresource-api.mayacode.co/api/v1/candidate?userId=${this.userLogger.userId}&pageSize=1&pageNumber=1`)
+                                fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${this.userLogger.userId}&pageSize=1&pageNumber=1`)
                                     .then(res => res.json())
                                     .then(data => {
                                         const candidate = data?.data?.data || [];
@@ -395,7 +395,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (!this.userLogger) return;
                                 const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
                                 if (!candidate || !candidate.id) return;
-                                return fetch(`http://humanresource-api.mayacode.co/api/v1/candidate/${candidate.id}/check`)
+                                return fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
                                     .then(res => res.json())
                                     .then(data => {
                                         const candidate = data?.data || null;
@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function () {
                             },
                             getCandidate() {
                                 if(!this.userLogger) return;
-                                fetch(`http://humanresource-api.mayacode.co/api/v1/candidate?userId=${this.userLogger.userId}&pageSize=1&pageNumber=1`)
+                                fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate?userId=${this.userLogger.userId}&pageSize=1&pageNumber=1`)
                                     .then(res => res.json())
                                     .then(data => {
                                         const candidate = data?.data?.data || [];
@@ -457,7 +457,7 @@ document.addEventListener('DOMContentLoaded', function () {
                                 if (!this.userLogger) return;
                                 const candidate = JSON.parse(localStorage.getItem("candidate") || "null");
                                 if (!candidate || !candidate.id) return;
-                                return fetch(`http://humanresource-api.mayacode.co/api/v1/candidate/${candidate.id}/check`)
+                                return fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/candidate/${candidate.id}/check`)
                                     .then(res => res.json())
                                     .then(data => {
                                         const candidate = data?.data || null;

@@ -86,7 +86,7 @@
                         this.applicationLoading = false;
                         return;
                     }
-                    const res = await fetch('http://humanresource-api.mayacode.co/api/v1/job-application', {
+                    const res = await fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -156,7 +156,7 @@
                 return new Date(dateString).toLocaleDateString('pt-BR', options);
             },
             getJobCategory() {
-                fetch('http://humanresource-api.mayacode.co/api/v1/job/category?isActive=true')
+                fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job/category?isActive=true')
                     .then(res => res.json())
                     .then(data => {
                         this.jobCategories = data?.data || [];
@@ -172,7 +172,7 @@
                 if (params.Location) query.append('Location', params.Location);
                 if (params.jobText) query.append('jobText', params.jobText);
 
-                const url = 'http://humanresource-api.mayacode.co/api/v1/job' + (query.toString() ? `?${query}` : '');
+                const url = 'https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job' + (query.toString() ? `?${query}` : '');
 
                 fetch(url)
                     .then(res => res.json())

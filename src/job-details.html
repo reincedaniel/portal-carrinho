@@ -75,7 +75,7 @@
                         this.applicationLoading = false;
                         return;
                     }
-                    const res = await fetch('http://humanresource-api.mayacode.co/api/v1/job-application', {
+                    const res = await fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job-application', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
@@ -113,7 +113,7 @@
                 }
                     this.loadingActiveJob = true;
 
-                    fetch(`http://humanresource-api.mayacode.co/api/v1/job/${jobId}`)
+                    fetch(`https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job/${jobId}`)
                         .then(res => res.json())
                         .then(data => {
                             this.activeJob = data?.data || null;
@@ -126,7 +126,7 @@
                         });
                 },
             getJobs() {
-                fetch('http://humanresource-api.mayacode.co/api/v1/job')
+                fetch('https://ypjkbbt6hgjcoi46mdpv5hkjzi0ttivo.lambda-url.us-east-2.on.aws/api/v1/job')
                 .then(res => res.json())
                 .then(data => {
                     this.jobsRaw = data 
